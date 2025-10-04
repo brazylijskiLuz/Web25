@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 interface AvatarBackgroundProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   circlePosition: "middle" | "right" | "left";
   assistant: "hand-raised" | "pointing-right" | "pointing-left";
 }
