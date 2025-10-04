@@ -13,13 +13,82 @@ const circlePositionVariants = cva(
   {
     variants: {
       position: {
-        middle: "left-1/2 bottom-[-80vh] h-[140vh] transform -translate-x-1/2",
-        right: "-right-[35vw] h-[110vh] bottom-[-51vh]",
-        left: "-left-[45vw] h-[110vh] bottom-[-6vh]",
+        middle: "left-1/2 transform -translate-x-1/2",
+        right: "-right-[35vw]",
+        left: "-left-[45vw]",
+        "pointing-up": "left-1/2 transform -translate-x-1/2",
+      },
+      size: {
+        small: "h-[30vh] bottom-[-10vh]",
+        medium: "h-[55vh] bottom-[-25vh]",
+        large: "h-[70vh] bottom-[-32vh]",
       },
     },
+    compoundVariants: [
+      {
+        position: "middle",
+        size: "small",
+        class: "h-[30vh] bottom-[-15vh]",
+      },
+      {
+        position: "middle",
+        size: "medium",
+        class: "h-[55vh] bottom-[-25vh]",
+      },
+      {
+        position: "middle",
+        size: "large",
+        class: "h-[70vh] bottom-[-40vh]",
+      },
+      {
+        position: "right",
+        size: "small",
+        class: "h-[65vh] bottom-[-35vh] -right-[80vh]",
+      },
+      {
+        position: "right",
+        size: "medium",
+        class: "h-[55vh] bottom-[-25vh]",
+      },
+      {
+        position: "right",
+        size: "large",
+        class: "h-[70vh] bottom-[-37vh]",
+      },
+      {
+        position: "left",
+        size: "small",
+        class: "h-[30vh] bottom-[-5vh]",
+      },
+      {
+        position: "left",
+        size: "medium",
+        class: "h-[55vh] bottom-[-3vh]",
+      },
+      {
+        position: "left",
+        size: "large",
+        class: "h-[70vh] bottom-[-12vh]",
+      },
+      {
+        position: "pointing-up",
+        size: "small",
+        class: "h-[30vh] bottom-[-12vh]",
+      },
+      {
+        position: "pointing-up",
+        size: "medium",
+        class: "h-[55vh] bottom-[-27vh]",
+      },
+      {
+        position: "pointing-up",
+        size: "large",
+        class: "h-[70vh] bottom-[-42vh]",
+      },
+    ],
     defaultVariants: {
       position: "middle",
+      size: "medium",
     },
   }
 );
@@ -30,12 +99,81 @@ const patternVariants = cva(
     variants: {
       position: {
         middle: "",
-        right: "ml-[25vw]",
-        left: "ml-[-25vw]",
+        right: "",
+        left: "",
+        "pointing-up": "",
+      },
+      size: {
+        small: "",
+        medium: "",
+        large: "",
       },
     },
+    compoundVariants: [
+      {
+        position: "middle",
+        size: "small",
+        class: "",
+      },
+      {
+        position: "middle",
+        size: "medium",
+        class: "",
+      },
+      {
+        position: "middle",
+        size: "large",
+        class: "",
+      },
+      {
+        position: "right",
+        size: "small",
+        class: "ml-[35vw]",
+      },
+      {
+        position: "right",
+        size: "medium",
+        class: "ml-[25vw]",
+      },
+      {
+        position: "right",
+        size: "large",
+        class: "ml-[30vw]",
+      },
+      {
+        position: "left",
+        size: "small",
+        class: "ml-[-20vw]",
+      },
+      {
+        position: "left",
+        size: "medium",
+        class: "ml-[-25vw]",
+      },
+      {
+        position: "left",
+        size: "large",
+        class: "ml-[-30vw]",
+      },
+      {
+        position: "pointing-up",
+        size: "small",
+        class: "",
+      },
+      {
+        position: "pointing-up",
+        size: "medium",
+        class: "",
+      },
+      {
+        position: "pointing-up",
+        size: "large",
+        class: "",
+      },
+    ],
     defaultVariants: {
       position: "middle",
+      size: "medium",
     },
   }
 );
@@ -45,19 +183,88 @@ const assistantVariants = cva(
   {
     variants: {
       position: {
-        middle: "left-1/2 bottom-[-65vh] h-[140vh] transform -translate-x-1/2",
-        right: "-right-[25vw] h-[110vh] bottom-[-53vh]",
-        left: "-left-[40vw] h-[110vh] bottom-[-40vh]",
+        middle: "left-1/2 transform -translate-x-1/2",
+        right: "-right-[25vw]",
+        left: "-left-[40vw]",
+        "pointing-up": "left-1/2 transform -translate-x-1/2",
+      },
+      size: {
+        small: "h-[30vh] bottom-[-20vh] -right-[30vw]",
+        medium: "h-[55vh] bottom-[-26vh]",
+        large: "h-[70vh] bottom-[-32vh]",
       },
     },
+    compoundVariants: [
+      {
+        position: "middle",
+        size: "small",
+        class: "h-[30vh] bottom-[-12vh]",
+      },
+      {
+        position: "middle",
+        size: "medium",
+        class: "h-[55vh] bottom-[-26vh]",
+      },
+      {
+        position: "middle",
+        size: "large",
+        class: "h-[70vh] bottom-[-32vh]",
+      },
+      {
+        position: "right",
+        size: "small",
+        class: "h-[30vh] bottom-0 -right-[35vw]",
+      },
+      {
+        position: "right",
+        size: "medium",
+        class: "h-[55vh] bottom-[-26vh]",
+      },
+      {
+        position: "right",
+        size: "large",
+        class: "h-[70vh] bottom-[-37vh]",
+      },
+      {
+        position: "left",
+        size: "small",
+        class: "h-[30vh] bottom-[-5vh]",
+      },
+      {
+        position: "left",
+        size: "medium",
+        class: "h-[55vh] bottom-[-20vh]",
+      },
+      {
+        position: "left",
+        size: "large",
+        class: "h-[70vh] bottom-[-30vh]",
+      },
+      {
+        position: "pointing-up",
+        size: "small",
+        class: "h-[30vh] bottom-[-10vh]",
+      },
+      {
+        position: "pointing-up",
+        size: "medium",
+        class: "h-[55vh] bottom-[-25vh]",
+      },
+      {
+        position: "pointing-up",
+        size: "large",
+        class: "h-[70vh] bottom-[-35vh]",
+      },
+    ],
     defaultVariants: {
       position: "middle",
+      size: "medium",
     },
   }
 );
 
 const getAssistantImagePath = (
-  assistant: "hand-raised" | "pointing-right" | "pointing-left"
+  assistant: "hand-raised" | "pointing-right" | "pointing-left" | "pointing-up"
 ) => {
   switch (assistant) {
     case "hand-raised":
@@ -66,6 +273,8 @@ const getAssistantImagePath = (
       return "/pointing-right.png";
     case "pointing-left":
       return "/pointing-left.png";
+    case "pointing-up":
+      return "/pointing-up.png";
     default:
       return "/hand-raised.png";
   }
@@ -76,7 +285,14 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
 
   return (
     <div>
-      <div className={cn(patternVariants({ position: avatar.avatarPosition }))}>
+      <div
+        className={cn(
+          patternVariants({
+            position: avatar.avatarPosition,
+            size: avatar.avatarSize,
+          })
+        )}
+      >
         <Image src="/pattern.png" alt="pattern" fill priority />
       </div>
 
@@ -86,7 +302,10 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
 
       <div
         className={cn(
-          circlePositionVariants({ position: avatar.avatarPosition })
+          circlePositionVariants({
+            position: avatar.avatarPosition,
+            size: avatar.avatarSize,
+          })
         )}
       >
         <Image
@@ -98,7 +317,12 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
         />
       </div>
       <div
-        className={cn(assistantVariants({ position: avatar.avatarPosition }))}
+        className={cn(
+          assistantVariants({
+            position: avatar.avatarPosition,
+            size: avatar.avatarSize,
+          })
+        )}
       >
         <Image
           src={getAssistantImagePath(avatar.avatarAssistant)}
