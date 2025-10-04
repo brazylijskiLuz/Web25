@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "../../layout/header";
+import { AvatarBackground } from "../../layout/avatar-background";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased px-20`}
       >
         <Header />
-        {children}
+        <AvatarBackground>{children}</AvatarBackground>
       </body>
     </html>
   );
