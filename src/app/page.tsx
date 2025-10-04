@@ -1,29 +1,59 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Title } from "@/components/onboarding/title";
+import { StaticChat } from "@/components/onboarding/static-chat";
+import { Results } from "@/components/onboarding/results";
+import useAvatar from "@/stores/useAvatar";
+import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { setAvatarPosition, setAvatarAssistant } = useAvatar();
+  const [isHidden, setIsHidden] = useState(false);
+  const [showNewContent, setShowNewContent] = useState(false);
+  const [animationFinished, setAnimationFinished] = useState(false);
+  const [resultsData, setResultsData] = useState<any>(null);
+
+  useEffect(() => {
+    setAvatarPosition("middle");
+    setAvatarAssistant("hand-raised");
+  }, []);
+
+  const handleStartClick = () => {
+    setIsHidden(true);
+    // Po zakończeniu animacji pokaż nowy kontent i ustaw absolute
+    setTimeout(() => {
+      setShowNewContent(true);
+      setAnimationFinished(true);
+      setAvatarAssistant("pointing-right");
+    }, 800);
+  };
+
+  const handleResultsReceived = (data: any) => {
+    setResultsData(data);
+    setAvatarPosition("left");
+    setAvatarAssistant("pointing-left");
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Button>test</Button>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+    <>
+      {!resultsData && (
+        <>
+          <Title
+            isHidden={isHidden}
+            animationFinished={animationFinished}
+            onStartClick={handleStartClick}
           />
-          Learn
-        </a>
-      </footer>
-    </div>
+
+          <StaticChat
+            showNewContent={showNewContent}
+            onResultsReceived={handleResultsReceived}
+          />
+        </>
+      )}
+
+      {resultsData && <Results data={resultsData} />}
+    </>
   );
 }
