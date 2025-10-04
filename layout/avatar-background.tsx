@@ -1,52 +1,60 @@
-import { Button } from "@/components/ui/button";
+"use client";
 import Image from "next/image";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import useAvatar from "@/stores/useAvatar";
 
 interface AvatarBackgroundProps {
   children: React.ReactNode;
-  circlePosition: "middle" | "right" | "left";
-  assistant: "hand-raised" | "pointing-right" | "pointing-left";
 }
 
-const circlePositionVariants = cva("fixed w-full", {
-  variants: {
-    position: {
-      middle: "left-1/2 bottom-[-80vh] h-[140vh] transform -translate-x-1/2",
-      right: "-right-[45vw] h-[110vh] bottom-[-40vh]",
-      left: "-left-[45vw] h-[110vh] bottom-[-40vh]",
+const circlePositionVariants = cva(
+  "fixed w-full transition-all duration-700 ease-in-out",
+  {
+    variants: {
+      position: {
+        middle: "left-1/2 bottom-[-80vh] h-[140vh] transform -translate-x-1/2",
+        right: "-right-[45vw] h-[110vh] bottom-[-40vh]",
+        left: "-left-[45vw] h-[110vh] bottom-[-40vh]",
+      },
     },
-  },
-  defaultVariants: {
-    position: "middle",
-  },
-});
+    defaultVariants: {
+      position: "middle",
+    },
+  }
+);
 
-const patternVariants = cva("fixed w-screen inset-0 -z-10", {
-  variants: {
-    position: {
-      middle: "",
-      right: "ml-[25vw]",
-      left: "ml-[-25vw]",
+const patternVariants = cva(
+  "fixed w-screen inset-0 -z-10 transition-all duration-700 ease-in-out",
+  {
+    variants: {
+      position: {
+        middle: "",
+        right: "ml-[25vw]",
+        left: "ml-[-25vw]",
+      },
     },
-  },
-  defaultVariants: {
-    position: "middle",
-  },
-});
+    defaultVariants: {
+      position: "middle",
+    },
+  }
+);
 
-const assistantVariants = cva("fixed w-full", {
-  variants: {
-    position: {
-      middle: "left-1/2 bottom-[-65vh] h-[140vh] transform -translate-x-1/2",
-      right: "-right-[40vw] h-[110vh] bottom-[-40vh]",
-      left: "-left-[40vw] h-[110vh] bottom-[-40vh]",
+const assistantVariants = cva(
+  "fixed w-full transition-all duration-700 ease-in-out",
+  {
+    variants: {
+      position: {
+        middle: "left-1/2 bottom-[-65vh] h-[140vh] transform -translate-x-1/2",
+        right: "-right-[40vw] h-[110vh] bottom-[-40vh]",
+        left: "-left-[40vw] h-[110vh] bottom-[-40vh]",
+      },
     },
-  },
-  defaultVariants: {
-    position: "middle",
-  },
-});
+    defaultVariants: {
+      position: "middle",
+    },
+  }
+);
 
 const getAssistantImagePath = (
   assistant: "hand-raised" | "pointing-right" | "pointing-left"
@@ -63,14 +71,12 @@ const getAssistantImagePath = (
   }
 };
 
-export const AvatarBackground = ({
-  children,
-  circlePosition,
-  assistant,
-}: AvatarBackgroundProps) => {
+export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
+  const avatar = useAvatar();
+
   return (
     <div>
-      <div className={cn(patternVariants({ position: circlePosition }))}>
+      <div className={cn(patternVariants({ position: avatar.avatarPosition }))}>
         <Image src="/pattern.png" alt="pattern" fill priority />
       </div>
 
@@ -78,7 +84,11 @@ export const AvatarBackground = ({
         {children}
       </div>
 
-      <div className={cn(circlePositionVariants({ position: circlePosition }))}>
+      <div
+        className={cn(
+          circlePositionVariants({ position: avatar.avatarPosition })
+        )}
+      >
         <Image
           src="/circle.svg"
           alt="circle"
@@ -87,9 +97,11 @@ export const AvatarBackground = ({
           priority
         />
       </div>
-      <div className={cn(assistantVariants({ position: circlePosition }))}>
+      <div
+        className={cn(assistantVariants({ position: avatar.avatarPosition }))}
+      >
         <Image
-          src={getAssistantImagePath(assistant)}
+          src={getAssistantImagePath(avatar.avatarAssistant)}
           alt="assistant"
           fill
           style={{ objectFit: "contain" }}
