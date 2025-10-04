@@ -9,44 +9,55 @@ interface MessageData {
   type: "bot" | "user";
   title?: string;
   content: string;
+  options?: { label: string; value: string }[];
+  inputType?: "text" | "number";
 }
 
 interface StaticChatProps {
   showNewContent: boolean;
 }
 
-// Wszystkie pytania i odpowiedzi w jednym miejscu
 const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
   {
     type: "bot",
     title: "Witaj! 👋",
     content:
       "Cześć! Jakiej wysokości emeryturę chciałbyś/chciałabyś otrzymywać?",
+    inputType: "number",
   },
   {
     type: "bot",
     title: "Ile masz lat?",
     content: "Ile masz lat?",
+    inputType: "number",
   },
   {
     type: "bot",
     title: "Jaka jest Twoja płeć?",
     content: "Jaka jest Twoja płeć?",
+    options: [
+      { label: "Kobieta", value: "kobieta" },
+      { label: "Mężczyzna", value: "mężczyzna" },
+    ],
+    inputType: "text",
   },
   {
     type: "bot",
     title: "Aktualne wynagrodzenie brutto",
     content: "Ile wynosi Twoje aktualne miesięczne wynagrodzenie brutto?",
+    inputType: "number",
   },
   {
     type: "bot",
     title: "Rok rozpoczęcia pracy",
     content: "W którym roku rozpocząłeś/rozpoczęłaś pracę?",
+    inputType: "number",
   },
   {
     type: "bot",
     title: "Rok przejścia na emeryturę",
     content: "W którym roku planujesz przejść na emeryturę?",
+    inputType: "number",
   },
   {
     type: "bot",
@@ -57,6 +68,7 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     type: "bot",
     title: "Czas trwania przerw w pracy",
     content: "Ile łącznie miesięcy trwały przerwy w Twojej pracy?",
+    inputType: "number",
   },
   {
     type: "bot",
@@ -68,12 +80,14 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     title: "Środki na koncie ZUS",
     content:
       "Ile wynoszą zgromadzone środki na Twoim koncie emerytalnym w ZUS?",
+    inputType: "number",
   },
   {
     type: "bot",
     title: "Środki na subkoncie ZUS",
     content:
       "Ile wynoszą zgromadzone środki na Twoim subkoncie emerytalnym w ZUS?",
+    inputType: "number",
   },
 ];
 
@@ -86,15 +100,13 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
 
   const scrollToBottom = () => {
     const container = chatScrollRef.current;
-    if (container) {
-      container.scrollTop = container.scrollHeight - container.clientHeight;
-    }
-  };
+    if (!container) return;
 
-  // Ensure scroll after render
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages.length]);
+    container.scrollTo({
+      top: container.scrollHeight - 20,
+      behavior: "smooth",
+    });
+  };
 
   // Inicjalizuj pierwszą wiadomość bota
   useEffect(() => {
@@ -105,19 +117,22 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
         type: firstMessage.type,
         title: firstMessage.title,
         content: firstMessage.content,
+        inputType: firstMessage.inputType,
+        options: firstMessage.options,
       };
       setMessages([initialMessage]);
       setCurrentMessageIndex(1);
     }
   }, [showNewContent, messages.length]);
 
-  const handleSendMessage = () => {
-    if (!userInput.trim()) return;
+  const handleSendMessage = (label?: string) => {
+    const content = (label ?? userInput).toString().trim();
+    if (!content) return;
 
     const newUserMessage: MessageData = {
       id: `user-${Date.now()}`,
       type: "user",
-      content: userInput.trim(),
+      content,
     };
 
     setMessages((prev) => [...prev, newUserMessage]);
@@ -132,12 +147,15 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
           type: nextBotMessage.type,
           title: nextBotMessage.title,
           content: nextBotMessage.content,
+          inputType: nextBotMessage.inputType,
+          options: nextBotMessage.options,
         };
         setMessages((prev) => [...prev, botResponse]);
         setCurrentMessageIndex((prev) => prev + 1);
         setBotPending(false);
+        setTimeout(scrollToBottom, 180);
       }
-    }, 1000);
+    }, 300);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -147,6 +165,12 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
     }
   };
 
+  const lastMessage = messages[messages.length - 1] as MessageData | undefined;
+  const hasOptions =
+    !botPending &&
+    lastMessage?.type === "bot" &&
+    Boolean(lastMessage.options && lastMessage.options.length);
+  console.log(hasOptions, "has options", lastMessage?.options);
   return (
     <div
       className={cn(
@@ -179,10 +203,27 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
               content={message.content}
             />
           ))}
-          {!botPending && (
+
+          {/* Option buttons */}
+          {hasOptions && (
+            <div className="flex gap-2 flex-wrap pt-2 justify-end">
+              {lastMessage!.options!.map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant="secondary"
+                  onClick={() => {
+                    handleSendMessage(opt.label);
+                  }}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          )}
+          {!botPending && !hasOptions && (
             <div className="flex justify-end gap-2 pt-4">
               <Input
-                type="text"
+                type={lastMessage?.inputType ?? "text"}
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -194,14 +235,11 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
         </div>
 
         {/* Input Area */}
-        <div
-          className="flex justify-end gap-2 pt-4 transition-all duration-500"
-          id="chat-input-container"
-        >
+        <div className="flex justify-end gap-2 pt-4" id="chat-input-container">
           {/* Floating Next Button */}
           <Button
-            onClick={handleSendMessage}
-            disabled={!userInput.trim() || botPending}
+            onClick={() => handleSendMessage()}
+            disabled={!userInput.trim() || botPending || hasOptions}
             className="absolute bottom-0 right-0"
           >
             Dalej
