@@ -5,7 +5,7 @@ export const Header = () => {
     <header className="flex justify-between py-6">
       <h2 className="text-2xl font-semibold">
         Symulator <span className="text-primary">Emerytalny</span>
-      </h2>
+      </p>
       <nav>
         <Button variant={"outline"}>Panel administratora</Button>
       </nav>
