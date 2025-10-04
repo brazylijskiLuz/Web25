@@ -10,6 +10,11 @@ export default function Home() {
   const [isHidden, setIsHidden] = useState(false);
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/results");
+  }, []);
 
   useEffect(() => {
     setAvatarPosition("middle");
