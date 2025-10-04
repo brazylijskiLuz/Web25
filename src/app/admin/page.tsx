@@ -10,7 +10,7 @@ import {
   TrendingUp,
   Filter,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -31,6 +31,27 @@ import {
   Cell,
 } from "recharts";
 
+interface ApiResponse {
+  value: ApiReportData[];
+  isSuccess: boolean;
+  isFailure: boolean;
+  errors: any[];
+}
+
+interface ApiReportData {
+  id: string;
+  usageTime: string;
+  expectedPension: number;
+  sex: { name: string; id: number };
+  salaryAmount: number;
+  consideredSickLeave: boolean;
+  subAccountBalance: number;
+  accountBalance: number;
+  pension: number;
+  realPension: number;
+  postalCode: string;
+}
+
 interface SimulatorUsage {
   dataUzycia: string;
   godzinaUzycia: string;
@@ -48,102 +69,169 @@ interface SimulatorUsage {
 export default function AdminPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState(new Date().toISOString().split("T")[0]);
+  const [apiData, setApiData] = useState<ApiReportData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data from API (using internal Next.js API route to avoid CORS)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/reports");
+        const data: ApiResponse = await response.json();
+
+        if (data.isSuccess && data.value) {
+          setApiData(data.value);
+        }
+      } catch (error) {
+        console.log(error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Transform API data to table format
+  const usageData: SimulatorUsage[] = apiData.map((item) => {
+    const date = new Date(item.usageTime);
+    return {
+      dataUzycia: date.toLocaleDateString("pl-PL"),
+      godzinaUzycia: date.toLocaleTimeString("pl-PL", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      emeryturaOczekiwana: item.expectedPension,
+      wiek: 0, // Age not provided in API
+      plec: item.sex.name === "Kobieta" ? "K" : "M",
+      wysokoscWynagrodzenia: item.salaryAmount,
+      uwzglednialOkresyChoroby: item.consideredSickLeave,
+      wysokoscZgromadzonychSrodkow: item.accountBalance,
+      emeryturaRzeczywista: item.pension,
+      emeryturaUrealniona: item.realPension,
+      kodPocztowy: item.postalCode,
+    };
+  });
+
+  // Calculate stats from real data
+  const totalUsages = apiData.length;
+  const today = new Date().toDateString();
+  const usagesToday = apiData.filter(
+    (item) => new Date(item.usageTime).toDateString() === today
+  ).length;
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const usagesThisMonth = apiData.filter((item) => {
+    const date = new Date(item.usageTime);
+    return (
+      date.getMonth() === currentMonth && date.getFullYear() === currentYear
+    );
+  }).length;
+
+  const averagePension =
+    apiData.length > 0
+      ? apiData.reduce((sum, item) => sum + item.pension, 0) / apiData.length
+      : 0;
 
   const stats = [
     {
       title: "Łączna liczba użyć",
-      value: "1,247",
+      value: totalUsages.toLocaleString("pl-PL"),
       icon: Users,
       bgColor: "#3f84d2",
       textColor: "#3f84d2",
     },
     {
       title: "Użycia dzisiaj",
-      value: "43",
+      value: usagesToday.toString(),
       icon: Clock,
       bgColor: "#00993f",
       textColor: "#00993f",
     },
     {
       title: "Użycia w tym miesiącu",
-      value: "387",
+      value: usagesThisMonth.toString(),
       icon: TrendingUp,
       bgColor: "#00416e",
       textColor: "#00416e",
     },
     {
       title: "Średnia emerytura",
-      value: "3,245 zł",
+      value: `${Math.round(averagePension).toLocaleString("pl-PL")} zł`,
       icon: TrendingUp,
       bgColor: "#ffb34f",
       textColor: "#ffb34f",
     },
   ];
 
-  // Przykładowe dane użycia symulatora
-  const usageData: SimulatorUsage[] = [
-    {
-      dataUzycia: "2024-10-04",
-      godzinaUzycia: "14:32",
-      emeryturaOczekiwana: 4500,
-      wiek: 45,
-      plec: "K",
-      wysokoscWynagrodzenia: 6500,
-      uwzglednialOkresyChoroby: true,
-      wysokoscZgromadzonychSrodkow: 125000,
-      emeryturaRzeczywista: 3245,
-      emeryturaUrealniona: 3580,
-      kodPocztowy: "00-001",
-    },
-    {
-      dataUzycia: "2024-10-04",
-      godzinaUzycia: "13:15",
-      emeryturaOczekiwana: 5000,
-      wiek: 52,
-      plec: "M",
-      wysokoscWynagrodzenia: 8200,
-      uwzglednialOkresyChoroby: false,
-      wysokoscZgromadzonychSrodkow: 185000,
-      emeryturaRzeczywista: 4120,
-      emeryturaUrealniona: 4550,
-      kodPocztowy: "02-495",
-    },
-    {
-      dataUzycia: "2024-10-04",
-      godzinaUzycia: "11:48",
-      emeryturaOczekiwana: 3800,
-      wiek: 38,
-      plec: "K",
-      wysokoscWynagrodzenia: 5500,
-      uwzglednialOkresyChoroby: true,
-      wysokoscZgromadzonychSrodkow: 95000,
-      emeryturaRzeczywista: 2850,
-      emeryturaUrealniona: 3140,
-      kodPocztowy: "31-530",
-    },
-  ];
+  // Gender distribution from real data
+  const women = apiData.filter((item) => item.sex.name === "Kobieta").length;
+  const men = apiData.filter((item) => item.sex.name === "Męszczyzna").length;
 
-  // Dane do wykresów
   const genderDistributionData = [
-    { name: "Kobiety", value: 634, fill: "#3f84d2" },
-    { name: "Mężczyźni", value: 613, fill: "#00416e" },
+    { name: "Kobiety", value: women, fill: "#3f84d2" },
+    { name: "Mężczyźni", value: men, fill: "#00416e" },
   ];
 
-  const pensionTrendsData = [
-    { miesiac: "Sty", oczekiwana: 4200, rzeczywista: 3100, urealniona: 3450 },
-    { miesiac: "Lut", oczekiwana: 4350, rzeczywista: 3200, urealniona: 3520 },
-    { miesiac: "Mar", oczekiwana: 4400, rzeczywista: 3250, urealniona: 3600 },
-    { miesiac: "Kwi", oczekiwana: 4500, rzeczywista: 3300, urealniona: 3680 },
-    { miesiac: "Maj", oczekiwana: 4550, rzeczywista: 3350, urealniona: 3720 },
-    { miesiac: "Cze", oczekiwana: 4600, rzeczywista: 3400, urealniona: 3780 },
-  ];
+  // Pension trends - group by month
+  const pensionTrendsData = (() => {
+    const monthlyData: {
+      [key: string]: {
+        oczekiwana: number[];
+        rzeczywista: number[];
+        urealniona: number[];
+      };
+    } = {};
 
+    apiData.forEach((item) => {
+      const date = new Date(item.usageTime);
+      const monthKey = date.toLocaleDateString("pl-PL", {
+        month: "short",
+        year: "numeric",
+      });
+
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          oczekiwana: [],
+          rzeczywista: [],
+          urealniona: [],
+        };
+      }
+
+      monthlyData[monthKey].oczekiwana.push(item.expectedPension);
+      monthlyData[monthKey].rzeczywista.push(item.pension);
+      monthlyData[monthKey].urealniona.push(item.realPension);
+    });
+
+    return Object.entries(monthlyData)
+      .slice(-6) // Last 6 months
+      .map(([month, values]) => ({
+        miesiac: month.split(" ")[0],
+        oczekiwana: Math.round(
+          values.oczekiwana.reduce((a, b) => a + b, 0) /
+            values.oczekiwana.length
+        ),
+        rzeczywista: Math.round(
+          values.rzeczywista.reduce((a, b) => a + b, 0) /
+            values.rzeczywista.length
+        ),
+        urealniona: Math.round(
+          values.urealniona.reduce((a, b) => a + b, 0) /
+            values.urealniona.length
+        ),
+      }));
+  })();
+
+  // Age distribution - placeholder as age is not in API
   const ageDistributionData = [
-    { grupa: "25-35", liczba: 145 },
-    { grupa: "36-45", liczba: 287 },
-    { grupa: "46-55", liczba: 412 },
-    { grupa: "56-65", liczba: 298 },
-    { grupa: "65+", liczba: 105 },
+    { grupa: "25-35", liczba: Math.round(totalUsages * 0.12) },
+    { grupa: "36-45", liczba: Math.round(totalUsages * 0.23) },
+    { grupa: "46-55", liczba: Math.round(totalUsages * 0.33) },
+    { grupa: "56-65", liczba: Math.round(totalUsages * 0.24) },
+    { grupa: "65+", liczba: Math.round(totalUsages * 0.08) },
   ];
 
   const chartConfig = {
@@ -171,9 +259,20 @@ export default function AdminPage() {
 
   const exportToXLS = () => {
     // Tutaj będzie logika eksportu do XLS
-    console.log("Eksportowanie danych do XLS...");
+    console.log("Eksportowanie danych do XLS...", usageData);
     alert("Eksport do XLS zostanie wkrótce zaimplementowany");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Ładowanie danych...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -285,7 +384,7 @@ export default function AdminPage() {
                     outerRadius={100}
                     label={(entry) =>
                       `${entry.name}: ${entry.value} (${(
-                        (entry.value / 1247) *
+                        (entry.value / totalUsages) *
                         100
                       ).toFixed(1)}%)`
                     }
