@@ -1,13 +1,14 @@
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Message } from "./message";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface MessageData {
   id: string;
   type: "bot" | "user";
   title?: string;
   content: string;
-  timestamp: Date;
 }
 
 interface StaticChatProps {
@@ -15,36 +16,98 @@ interface StaticChatProps {
 }
 
 // Wszystkie pytania i odpowiedzi w jednym miejscu
-const CHAT_MESSAGES: Omit<MessageData, "id" | "timestamp">[] = [
+const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
   {
     type: "bot",
     title: "Witaj! 👋",
     content:
-      "Cześć! Jestem Twoim asystentem emerytalnym. Pomogę Ci zaplanować przyszłość finansową. Jak się czujesz z myślą o emeryturze?",
+      "Cześć! Jakiej wysokości emeryturę chciałbyś/chciałabyś otrzymywać?",
   },
   {
     type: "bot",
-    title: "Rozumiem Twoje obawy",
-    content:
-      "To całkowicie normalne! Większość ludzi ma podobne uczucia. Czy wiesz, że można to zmienić już dziś?",
+    title: "Ile masz lat?",
+    content: "Ile masz lat?",
   },
   {
     type: "bot",
-    title: "Świetnie! 🎯",
+    title: "Jaka jest Twoja płeć?",
+    content: "Jaka jest Twoja płeć?",
+  },
+  {
+    type: "bot",
+    title: "Aktualne wynagrodzenie brutto",
+    content: "Ile wynosi Twoje aktualne miesięczne wynagrodzenie brutto?",
+  },
+  {
+    type: "bot",
+    title: "Rok rozpoczęcia pracy",
+    content: "W którym roku rozpocząłeś/rozpoczęłaś pracę?",
+  },
+  {
+    type: "bot",
+    title: "Rok przejścia na emeryturę",
+    content: "W którym roku planujesz przejść na emeryturę?",
+  },
+  {
+    type: "bot",
+    title: "Przerwy w pracy zawodowej",
+    content: "Czy miałeś/miałaś przerwy w pracy zawodowej?",
+  },
+  {
+    type: "bot",
+    title: "Czas trwania przerw w pracy",
+    content: "Ile łącznie miesięcy trwały przerwy w Twojej pracy?",
+  },
+  {
+    type: "bot",
+    title: "Znajomość stanu konta ZUS",
+    content: "Czy znasz stan swojego konta emerytalnego w ZUS?",
+  },
+  {
+    type: "bot",
+    title: "Środki na koncie ZUS",
     content:
-      "Czy masz już jakieś oszczędności na emeryturę, czy dopiero zaczynasz planować?",
+      "Ile wynoszą zgromadzone środki na Twoim koncie emerytalnym w ZUS?",
+  },
+  {
+    type: "bot",
+    title: "Środki na subkoncie ZUS",
+    content:
+      "Ile wynoszą zgromadzone środki na Twoim subkoncie emerytalnym w ZUS?",
   },
 ];
 
 export const StaticChat = ({ showNewContent }: StaticChatProps) => {
-  const [messages, setMessages] = useState<MessageData[]>(() =>
-    CHAT_MESSAGES.map((msg, index) => ({
-      ...msg,
-      id: `msg-${index}`,
-      timestamp: new Date(),
-    }))
-  );
+  const [messages, setMessages] = useState<MessageData[]>([]);
   const [userInput, setUserInput] = useState("");
+  const [botPending, setBotPending] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Inicjalizuj pierwszą wiadomość bota
+  useEffect(() => {
+    if (showNewContent && messages.length === 0 && CHAT_MESSAGES.length > 0) {
+      const firstMessage = CHAT_MESSAGES[0];
+      const initialMessage: MessageData = {
+        id: `bot-${Date.now()}`,
+        type: firstMessage.type,
+        title: firstMessage.title,
+        content: firstMessage.content,
+      };
+      setMessages([initialMessage]);
+      setCurrentMessageIndex(1);
+    }
+  }, [showNewContent, messages.length]);
+
+  // Scroll to bottom whenever messages array changes
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTo({
+        top: chatScrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
   const handleSendMessage = () => {
     if (!userInput.trim()) return;
@@ -53,23 +116,25 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
       id: `user-${Date.now()}`,
       type: "user",
       content: userInput.trim(),
-      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, newUserMessage]);
     setUserInput("");
+    setBotPending(true);
 
-    // Symulacja odpowiedzi bota po 1 sekundzie
     setTimeout(() => {
-      const botResponse: MessageData = {
-        id: `bot-${Date.now()}`,
-        type: "bot",
-        title: "Dziękuję za odpowiedź!",
-        content:
-          "To bardzo pomocne informacje. Czy chciałbyś dowiedzieć się więcej o opcjach inwestycyjnych?",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botResponse]);
+      if (currentMessageIndex < CHAT_MESSAGES.length) {
+        const nextBotMessage = CHAT_MESSAGES[currentMessageIndex];
+        const botResponse: MessageData = {
+          id: `bot-${Date.now()}`,
+          type: nextBotMessage.type,
+          title: nextBotMessage.title,
+          content: nextBotMessage.content,
+        };
+        setMessages((prev) => [...prev, botResponse]);
+        setCurrentMessageIndex((prev) => prev + 1);
+        setBotPending(false);
+      }
     }, 1000);
   };
 
@@ -87,9 +152,22 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
         showNewContent ? "opacity-100" : "opacity-0"
       )}
     >
-      <div className="w-full max-w-3xl h-[600px] flex flex-col">
+      {/* Top gradient overlay using inline styles */}
+      <div
+        className="absolute top-0 left-0 w-full h-[60px] z-20"
+        style={{
+          background:
+            "linear-gradient(to bottom, var(--background) 0%, transparent 100%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div className="w-full pb-12 relative max-w-3xl h-[500px] flex flex-col">
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-4">
+        <div
+          className="overflow-y-auto no-scrollbar pt-10 space-y-4 transition-padding duration-500"
+          id="chat-scroll-container"
+          ref={chatScrollRef}
+        >
           {messages.map((message) => (
             <Message
               key={message.id}
@@ -97,28 +175,35 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
               type={message.type}
               title={message.title}
               content={message.content}
-              timestamp={message.timestamp}
             />
           ))}
+          {!botPending && (
+            <div className="flex justify-end gap-2 pt-4">
+              <Input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Napisz wiadomość..."
+                className="w-64"
+              />
+            </div>
+          )}
         </div>
 
         {/* Input Area */}
-        <div className="flex justify-end gap-2 pt-4">
-          <input
-            type="text"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Napisz wiadomość..."
-            className="w-64 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <button
+        <div
+          className="flex justify-end gap-2 pt-4 transition-all duration-500"
+          id="chat-input-container"
+        >
+          {/* Floating Next Button */}
+          <Button
             onClick={handleSendMessage}
-            disabled={!userInput.trim()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            disabled={!userInput.trim() || botPending}
+            className="absolute bottom-0 right-0"
           >
-            Wyślij
-          </button>
+            Dalej
+          </Button>
         </div>
       </div>
     </div>
