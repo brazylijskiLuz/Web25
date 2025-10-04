@@ -67,10 +67,13 @@ interface SimulatorUsage {
 }
 
 export default function AdminPage() {
-  const [dateFrom, setDateFrom] = useState("");
+  const [dateFrom, setDateFrom] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [dateTo, setDateTo] = useState(new Date().toISOString().split("T")[0]);
   const [apiData, setApiData] = useState<ApiReportData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   // Fetch data from API (using internal Next.js API route to avoid CORS)
   useEffect(() => {
@@ -257,6 +260,60 @@ export default function AdminPage() {
     },
   };
 
+  const handleFilter = async () => {
+    if (!dateFrom || !dateTo) {
+      alert("Proszę wybrać obie daty");
+      return;
+    }
+
+    try {
+      setDownloadingReport(true);
+
+      // Convert dates to ISO format with time
+      const fromDate = new Date(dateFrom);
+      fromDate.setHours(0, 0, 0, 0);
+      const toDate = new Date(dateTo);
+      toDate.setHours(23, 59, 59, 999);
+
+      const response = await fetch("/api/reports/date-range", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: fromDate.toISOString(),
+          to: toDate.toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch filtered data");
+      }
+
+      const data = await response.json();
+
+      if (data.isSuccess && data.value) {
+        // The value is a URL to the Excel file
+        const fileUrl = data.value.startsWith("http")
+          ? data.value
+          : `https://${data.value}`;
+
+        // Download the file automatically
+        const link = document.createElement("a");
+        link.href = fileUrl;
+        link.download = `raport_${dateFrom}_${dateTo}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error("Error filtering data:", error);
+      alert("Błąd podczas generowania raportu");
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
+
   const exportToXLS = () => {
     // Tutaj będzie logika eksportu do XLS
     console.log("Eksportowanie danych do XLS...", usageData);
@@ -429,10 +486,6 @@ export default function AdminPage() {
                 Pobierz raport z użycia symulatora w formacie Excel
               </p>
             </div>
-            <Button onClick={exportToXLS} size="lg">
-              <Download className="size-5" />
-              Eksportuj do XLS
-            </Button>
           </div>
 
           {/* Filters */}
@@ -465,9 +518,24 @@ export default function AdminPage() {
                 />
               </div>
             </div>
-            <Button variant="outline" size="default" className="self-end">
-              <Filter className="size-4" />
-              Filtruj
+            <Button
+              variant="outline"
+              size="default"
+              className="self-end"
+              onClick={handleFilter}
+              disabled={downloadingReport}
+            >
+              {downloadingReport ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+                  Generowanie...
+                </>
+              ) : (
+                <>
+                  <Download className="size-4" />
+                  Generuj raport Excel
+                </>
+              )}
             </Button>
           </div>
         </div>
