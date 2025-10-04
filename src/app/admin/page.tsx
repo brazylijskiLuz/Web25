@@ -47,7 +47,7 @@ interface SimulatorUsage {
 
 export default function AdminPage() {
   const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateTo, setDateTo] = useState(new Date().toISOString().split("T")[0]);
 
   const stats = [
     {
