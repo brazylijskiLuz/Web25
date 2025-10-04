@@ -1,29 +1,33 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+"use client";
+
+import { AvatarBackground } from "../../layout/avatar-background";
+import { useState } from "react";
+import { Title } from "@/components/onboarding/title";
+import { StaticChat } from "@/components/onboarding/static-chat";
 
 export default function Home() {
+  const [isHidden, setIsHidden] = useState(false);
+  const [showNewContent, setShowNewContent] = useState(false);
+  const [animationFinished, setAnimationFinished] = useState(false);
+
+  const handleStartClick = () => {
+    setIsHidden(true);
+    // Po zakończeniu animacji pokaż nowy kontent i ustaw absolute
+    setTimeout(() => {
+      setShowNewContent(true);
+      setAnimationFinished(true);
+    }, 800);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Button>test</Button>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-      </footer>
-    </div>
+    <AvatarBackground circlePosition="middle" assistant="hand-raised">
+      <Title
+        isHidden={isHidden}
+        animationFinished={animationFinished}
+        onStartClick={handleStartClick}
+      />
+
+      <StaticChat showNewContent={showNewContent} />
+    </AvatarBackground>
   );
 }
