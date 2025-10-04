@@ -21,7 +21,7 @@ export const Message = ({ type, title, content }: MessageProps) => {
   return (
     <div
       className={cn(
-        "flex gap-3 transition-all duration-500 ease-out",
+        "flex gap-3 transition-all duration-200 ease-out",
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
         type === "user" ? "justify-end" : "justify-start"
       )}
