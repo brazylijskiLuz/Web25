@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Title } from "@/components/onboarding/title";
 import { StaticChat } from "@/components/onboarding/static-chat";
+import { Results } from "@/components/onboarding/results";
 import useAvatar from "@/stores/useAvatar";
 import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -12,7 +13,7 @@ export default function Home() {
   const [isHidden, setIsHidden] = useState(false);
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
-  const router = useRouter();
+  const [resultsData, setResultsData] = useState<any>(null);
 
   useEffect(() => {
     setAvatarPosition("middle");
@@ -29,15 +30,30 @@ export default function Home() {
     }, 800);
   };
 
+  const handleResultsReceived = (data: any) => {
+    setResultsData(data);
+    setAvatarPosition("left");
+    setAvatarAssistant("pointing-left");
+  };
+
   return (
     <>
-      <Title
-        isHidden={isHidden}
-        animationFinished={animationFinished}
-        onStartClick={handleStartClick}
-      />
+      {!resultsData && (
+        <>
+          <Title
+            isHidden={isHidden}
+            animationFinished={animationFinished}
+            onStartClick={handleStartClick}
+          />
 
-      <StaticChat showNewContent={showNewContent} />
+          <StaticChat
+            showNewContent={showNewContent}
+            onResultsReceived={handleResultsReceived}
+          />
+        </>
+      )}
+
+      {resultsData && <Results data={resultsData} />}
     </>
   );
 }
