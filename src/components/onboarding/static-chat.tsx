@@ -84,6 +84,18 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
 
+  const scrollToBottom = () => {
+    const container = chatScrollRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight - container.clientHeight;
+    }
+  };
+
+  // Ensure scroll after render
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages.length]);
+
   // Inicjalizuj pierwszą wiadomość bota
   useEffect(() => {
     if (showNewContent && messages.length === 0 && CHAT_MESSAGES.length > 0) {
@@ -98,16 +110,6 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
       setCurrentMessageIndex(1);
     }
   }, [showNewContent, messages.length]);
-
-  // Scroll to bottom whenever messages array changes
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTo({
-        top: chatScrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messages]);
 
   const handleSendMessage = () => {
     if (!userInput.trim()) return;
@@ -161,7 +163,7 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
           pointerEvents: "none",
         }}
       />
-      <div className="w-full pb-12 relative max-w-3xl h-[500px] flex flex-col">
+      <div className="w-full pb-12 relative max-w-3xl h-[480px] flex flex-col">
         {/* Messages Container */}
         <div
           className="overflow-y-auto no-scrollbar pt-10 space-y-4 transition-padding duration-500"
