@@ -4,16 +4,15 @@ import { useEffect, useState } from "react";
 import { Title } from "@/components/onboarding/title";
 import { StaticChat } from "@/components/onboarding/static-chat";
 import useAvatar from "@/stores/useAvatar";
-import { redirect } from "next/navigation";
 
 export default function Home() {
   const { setAvatarPosition, setAvatarAssistant } = useAvatar();
   const [isHidden, setIsHidden] = useState(false);
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    redirect("/dashboard");
     setAvatarPosition("middle");
     setAvatarAssistant("hand-raised");
   }, []);
