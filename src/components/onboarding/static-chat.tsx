@@ -15,6 +15,7 @@ interface MessageData {
 
 interface StaticChatProps {
   showNewContent: boolean;
+  onResultsReceived?: (data: any) => void;
 }
 
 const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
@@ -89,7 +90,10 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
   // },
 ];
 
-export const StaticChat = ({ showNewContent }: StaticChatProps) => {
+export const StaticChat = ({
+  showNewContent,
+  onResultsReceived,
+}: StaticChatProps) => {
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [userInput, setUserInput] = useState("");
   const [botPending, setBotPending] = useState(false);
@@ -210,7 +214,7 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
           throw new Error("Failed to get response from chat API");
         }
 
-        // Read the streaming response and log it
+        // Read the streaming response and parse it
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let fullResponse = "";
@@ -226,6 +230,66 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
         }
 
         console.log("API Response:", fullResponse);
+
+        // Parse the JSON response
+        try {
+          // The streaming response might have extra data, so we need to extract just the JSON
+          // Find the last complete JSON object in the response
+          const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsedData = JSON.parse(jsonMatch[0]);
+            console.log("Parsed data:", parsedData);
+
+            // Validate that the parsed data has the required fields
+            if (
+              parsedData &&
+              typeof parsedData === "object" &&
+              "emerytura_nominalna_miesieczna_brutto" in parsedData &&
+              "kapital_emerytalny" in parsedData
+            ) {
+              // Call the callback with the parsed data
+              if (onResultsReceived) {
+                onResultsReceived(parsedData);
+              }
+            } else {
+              console.error(
+                "Parsed data is missing required fields:",
+                parsedData
+              );
+              // Show error message to user
+              const errorMessage: MessageData = {
+                id: `bot-error-${Date.now()}`,
+                type: "bot",
+                title: "Błąd",
+                content:
+                  "Przepraszamy, wystąpił błąd podczas obliczania emerytury. Spróbuj ponownie.",
+              };
+              setMessages((prev) => [...prev, errorMessage]);
+            }
+          } else {
+            console.error("No JSON found in response:", fullResponse);
+            // Show error message to user
+            const errorMessage: MessageData = {
+              id: `bot-error-${Date.now()}`,
+              type: "bot",
+              title: "Błąd",
+              content:
+                "Przepraszamy, nie udało się przetworzyć odpowiedzi. Spróbuj ponownie.",
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+          }
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError);
+          // Show error message to user
+          const errorMessage: MessageData = {
+            id: `bot-error-${Date.now()}`,
+            type: "bot",
+            title: "Błąd",
+            content:
+              "Przepraszamy, wystąpił błąd techniczny. Spróbuj ponownie.",
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+        }
       } catch (error) {
         console.error("Error sending message to API:", error);
       } finally {
