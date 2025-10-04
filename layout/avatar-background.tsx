@@ -12,7 +12,7 @@ interface AvatarBackgroundProps {
 const circlePositionVariants = cva("fixed w-full", {
   variants: {
     position: {
-      middle: "left-1/2 bottom-[-80vh] h-[140vh] transform -translate-x-1/2",
+      middle: "left-1/2 bottom-[-93vh] h-[140vh] transform -translate-x-1/2",
       right: "-right-[45vw] h-[110vh] bottom-[-40vh]",
       left: "-left-[45vw] h-[110vh] bottom-[-40vh]",
     },
@@ -38,7 +38,7 @@ const patternVariants = cva("fixed w-screen inset-0 -z-10", {
 const assistantVariants = cva("fixed w-full", {
   variants: {
     position: {
-      middle: "left-1/2 bottom-[-65vh] h-[140vh] transform -translate-x-1/2",
+      middle: "left-1/2 bottom-[-60vh] h-[120vh] transform -translate-x-1/2",
       right: "-right-[40vw] h-[110vh] bottom-[-40vh]",
       left: "-left-[40vw] h-[110vh] bottom-[-40vh]",
     },
