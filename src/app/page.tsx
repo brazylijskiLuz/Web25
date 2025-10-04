@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Title } from "@/components/onboarding/title";
 import { StaticChat } from "@/components/onboarding/static-chat";
 import useAvatar from "@/stores/useAvatar";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { setAvatarPosition, setAvatarAssistant } = useAvatar();
@@ -11,10 +12,6 @@ export default function Home() {
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    router.push("/results");
-  }, []);
 
   useEffect(() => {
     setAvatarPosition("middle");
