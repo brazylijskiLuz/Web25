@@ -70,25 +70,23 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     content: "Ile łącznie miesięcy trwały przerwy w Twojej pracy?",
     inputType: "number",
   },
-  {
-    type: "bot",
-    title: "Znajomość stanu konta ZUS",
-    content: "Czy znasz stan swojego konta emerytalnego w ZUS?",
-  },
-  {
-    type: "bot",
-    title: "Środki na koncie ZUS",
-    content:
-      "Ile wynoszą zgromadzone środki na Twoim koncie emerytalnym w ZUS?",
-    inputType: "number",
-  },
-  {
-    type: "bot",
-    title: "Środki na subkoncie ZUS",
-    content:
-      "Ile wynoszą zgromadzone środki na Twoim subkoncie emerytalnym w ZUS?",
-    inputType: "number",
-  },
+  // {
+  //   type: "bot",
+  //   title: "Znajomość stanu konta ZUS",
+  //   content: "Czy znasz stan swojego konta emerytalnego w ZUS?",
+  // },
+  // {
+  //   type: "bot",
+  //   title: "Środki na koncie ZUS",
+  //   content:
+  //     "Ile wynoszą zgromadzone środki na Twoim koncie emerytalnym w ZUS?",
+  // },
+  // {
+  //   type: "bot",
+  //   title: "Środki na subkoncie ZUS",
+  //   content:
+  //     "Ile wynoszą zgromadzone środki na Twoim subkoncie emerytalnym w ZUS?",
+  // },
 ];
 
 export const StaticChat = ({ showNewContent }: StaticChatProps) => {
@@ -139,7 +137,102 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
     setUserInput("");
     setBotPending(true);
 
-    setTimeout(() => {
+    // Check if this is the last question
+    const isLastQuestion = currentMessageIndex >= CHAT_MESSAGES.length;
+
+    if (isLastQuestion) {
+      // Collect all user answers
+      try {
+        const allMessages = [...messages, newUserMessage];
+        const userAnswers = allMessages
+          .filter((msg) => msg.type === "user")
+          .map((msg) => msg.content);
+
+        // Map answers to fields
+        // Index 0: Wysokość emerytury (pomijamy - nie ma w formacie)
+        // Index 1: Wiek
+        const wiek = userAnswers[1] || "";
+        // Index 2: Płeć
+        const plec = userAnswers[2] || "";
+        // Index 3: Wynagrodzenie brutto
+        const wynagrodzenie_brutto = userAnswers[3] || "";
+        // Index 4: Rok rozpoczęcia pracy
+        const rok_rozpoczecia_pracy = userAnswers[4] || "";
+        // Index 5: Rok zakończenia pracy
+        const rok_zakonczenia_pracy = userAnswers[5] || "";
+        // Index 6: Przerwy w pracy
+        const przerwy_w_pracy = userAnswers[6] || "";
+        // Index 7: Liczba miesięcy przerw
+        const przerwy_laczna_liczba_miesiecy = userAnswers[7] || "";
+
+        // Format the data
+        let formattedContent = "Dane użytkownika (obowiązkowe):\n";
+        formattedContent += `wiek: ${wiek}\n`;
+        formattedContent += `plec: "${plec}"\n`;
+        formattedContent += `wynagrodzenie_brutto: ${wynagrodzenie_brutto}\n`;
+        formattedContent += `rok_rozpoczecia_pracy: ${rok_rozpoczecia_pracy}\n`;
+        formattedContent += `rok_zakonczenia_pracy: ${rok_zakonczenia_pracy}`;
+
+        // Add optional data if present
+        if (przerwy_w_pracy || przerwy_laczna_liczba_miesiecy) {
+          formattedContent += "\n\nDane użytkownika (opcjonalne):";
+          if (przerwy_w_pracy) {
+            const przerwyValue =
+              przerwy_w_pracy.toLowerCase().includes("tak") ||
+              przerwy_w_pracy.toLowerCase().includes("yes");
+            formattedContent += `\nprzerwy_w_pracy: ${przerwyValue}`;
+          }
+          if (przerwy_laczna_liczba_miesiecy) {
+            formattedContent += `\nprzerwy_laczna_liczba_miesiecy: ${przerwy_laczna_liczba_miesiecy}`;
+          }
+        }
+
+        const requestPayload = {
+          messages: [
+            {
+              role: "user",
+              content: formattedContent,
+            },
+          ],
+        };
+
+        console.log("Sending to API:", requestPayload);
+
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestPayload),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to get response from chat API");
+        }
+
+        // Read the streaming response and log it
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = "";
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            fullResponse += chunk;
+          }
+        }
+
+        console.log("API Response:", fullResponse);
+      } catch (error) {
+        console.error("Error sending message to API:", error);
+      } finally {
+        setBotPending(false);
+      }
+    } else {
+      // Show the next static bot message
       if (currentMessageIndex < CHAT_MESSAGES.length) {
         const nextBotMessage = CHAT_MESSAGES[currentMessageIndex];
         const botResponse: MessageData = {
@@ -155,7 +248,6 @@ export const StaticChat = ({ showNewContent }: StaticChatProps) => {
         setBotPending(false);
         setTimeout(scrollToBottom, 180);
       }
-    }, 300);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
