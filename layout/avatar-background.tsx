@@ -74,7 +74,7 @@ export const AvatarBackground = ({
         <Image src="/pattern.png" alt="pattern" fill priority />
       </div>
 
-      <div className="relative z-10 flex items-center justify-center">
+      <div className="relative z-10 flex flex-col items-center justify-center">
         {children}
       </div>
 
