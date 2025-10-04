@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Title } from "@/components/onboarding/title";
 import { StaticChat } from "@/components/onboarding/static-chat";
 import useAvatar from "@/stores/useAvatar";
+import { redirect } from "next/navigation";
 
 export default function Home() {
   const { setAvatarPosition, setAvatarAssistant } = useAvatar();
@@ -12,6 +13,7 @@ export default function Home() {
   const [animationFinished, setAnimationFinished] = useState(false);
 
   useEffect(() => {
+    redirect("/dashboard");
     setAvatarPosition("middle");
     setAvatarAssistant("hand-raised");
   }, []);
