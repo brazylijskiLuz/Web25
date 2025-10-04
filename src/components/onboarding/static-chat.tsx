@@ -127,7 +127,7 @@ export const StaticChat = ({
     }
   }, [showNewContent, messages.length]);
 
-  const handleSendMessage = (label?: string) => {
+  const handleSendMessage = async (label?: string) => {
     const content = (label ?? userInput).toString().trim();
     if (!content) return;
 
@@ -312,6 +312,7 @@ export const StaticChat = ({
         setBotPending(false);
         setTimeout(scrollToBottom, 180);
       }
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
