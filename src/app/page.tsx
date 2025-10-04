@@ -12,12 +12,6 @@ export default function Home() {
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
 
-  useEffect(() => {
-    redirect("/dashboard");
-    setAvatarPosition("middle");
-    setAvatarAssistant("hand-raised");
-  }, []);
-
   const handleStartClick = () => {
     setIsHidden(true);
     // Po zakończeniu animacji pokaż nowy kontent i ustaw absolute

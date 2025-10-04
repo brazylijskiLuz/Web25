@@ -5,7 +5,9 @@ import { cn } from "@/lib/utils";
 import useAvatar from "@/stores/useAvatar";
 
 interface AvatarBackgroundProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  circlePosition: "middle" | "right" | "left";
+  assistant: "hand-raised" | "pointing-right" | "pointing-left";
 }
 
 const circlePositionVariants = cva(
