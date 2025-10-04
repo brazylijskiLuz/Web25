@@ -67,6 +67,7 @@ interface SimulatorUsage {
 }
 
 export default function AdminPage() {
+  console.log("test");
   const [dateFrom, setDateFrom] = useState(
     new Date().toISOString().split("T")[0]
   );
