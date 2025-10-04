@@ -14,8 +14,8 @@ const circlePositionVariants = cva(
     variants: {
       position: {
         middle: "left-1/2 bottom-[-80vh] h-[140vh] transform -translate-x-1/2",
-        right: "-right-[45vw] h-[110vh] bottom-[-40vh]",
-        left: "-left-[45vw] h-[110vh] bottom-[-40vh]",
+        right: "-right-[35vw] h-[110vh] bottom-[-51vh]",
+        left: "-left-[45vw] h-[110vh] bottom-[-6vh]",
       },
     },
     defaultVariants: {
@@ -46,7 +46,7 @@ const assistantVariants = cva(
     variants: {
       position: {
         middle: "left-1/2 bottom-[-65vh] h-[140vh] transform -translate-x-1/2",
-        right: "-right-[40vw] h-[110vh] bottom-[-40vh]",
+        right: "-right-[25vw] h-[110vh] bottom-[-53vh]",
         left: "-left-[40vw] h-[110vh] bottom-[-40vh]",
       },
     },

@@ -22,7 +22,8 @@ export default function Home() {
     setTimeout(() => {
       setShowNewContent(true);
       setAnimationFinished(true);
-      setAvatarAssistant("pointing-right");
+      setAvatarPosition("right");
+      setAvatarAssistant("pointing-left");
     }, 800);
   };
 
