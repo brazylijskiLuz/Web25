@@ -23,7 +23,7 @@ const circlePositionVariants = cva(
       size: {
         small: "h-[30vh] bottom-[-10vh]",
         medium: "h-[55vh] bottom-[-25vh]",
-        large: "h-[70vh] bottom-[-32vh]",
+        large: "bottom-[-80vh] h-[140vh]",
       },
     },
     compoundVariants: [
@@ -35,12 +35,12 @@ const circlePositionVariants = cva(
       {
         position: "middle",
         size: "medium",
-        class: "h-[55vh] bottom-[-25vh]",
+        class: "h-[75.27vh] bottom-[-34.21vh]",
       },
       {
         position: "middle",
         size: "large",
-        class: "h-[70vh] bottom-[-40vh]",
+        class: "bottom-[-72vh] h-[126vh]",
       },
       {
         position: "right",
@@ -55,7 +55,7 @@ const circlePositionVariants = cva(
       {
         position: "right",
         size: "large",
-        class: "h-[70vh] bottom-[-37vh]",
+        class: "h-[126vh] bottom-[-72vh]",
       },
       {
         position: "left",
@@ -193,7 +193,7 @@ const assistantVariants = cva(
       size: {
         small: "h-[30vh] bottom-[-20vh] -right-[30vw]",
         medium: "h-[55vh] bottom-[-26vh]",
-        large: "h-[70vh] bottom-[-32vh]",
+        large: "bottom-[-65vh] h-[140vh]",
       },
     },
     compoundVariants: [
@@ -205,12 +205,12 @@ const assistantVariants = cva(
       {
         position: "middle",
         size: "medium",
-        class: "h-[55vh] bottom-[-26vh]",
+        class: "h-[93.5vh] bottom-[-44.2vh]",
       },
       {
         position: "middle",
         size: "large",
-        class: "h-[70vh] bottom-[-32vh]",
+        class: "bottom-[-58.5vh] h-[126vh]",
       },
       {
         position: "right",
@@ -225,7 +225,7 @@ const assistantVariants = cva(
       {
         position: "right",
         size: "large",
-        class: "h-[70vh] bottom-[-37vh]",
+        class: "h-[126vh] bottom-[-58.5vh]",
       },
       {
         position: "left",

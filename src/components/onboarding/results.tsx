@@ -63,7 +63,7 @@ const formatDecimal = (value: number, decimals = 1): string => {
 
 export const Results = ({ data }: ResultsProps) => {
   return (
-    <div className="mt-20 flex w-full max-w-6xl mx-auto px-4">
+    <div className="mt-20 flex w-full  mx-auto px-4">
       <div className="w-full">
         <label className="text-[20px] font-semibold">Kwota nominalna</label>
         <h1 className="text-[108px] font-black leading-[108px] text-primary">
