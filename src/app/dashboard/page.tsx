@@ -217,7 +217,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex w-full h-screen overflow-hidden mt-14">
-      <div className="w-[60%] overflow-y-auto">
+      <div className="w-[60%] overflow-y-auto pr-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="w-full text-[36px] font-bold">
             Twój panel <span className="text-primary">emerytalny</span>
