@@ -50,7 +50,7 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     type: "bot",
     title: "Ile masz lat?",
     // Zmieniono content aby różnił się od title
-    content: "Podaj, proszę, swój wiek.",
+    content: "Podaj swój wiek.",
     inputType: "number",
     validation: { min: 10, max: 100, step: 1 },
   },
@@ -58,7 +58,7 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     type: "bot",
     title: "Jaka jest Twoja płeć?",
     // Zmieniono content aby różnił się od title
-    content: "Jaką posiadasz płeć?",
+    content: "Wybierz odpowiednie pole.",
     options: [
       { label: "Kobieta", value: "kobieta" },
       { label: "Mężczyzna", value: "mężczyzna" },
@@ -634,7 +634,7 @@ export const StaticChat = ({
 
           {/* Placeholder view displayed after chat is finished */}
           {chatFinished && (
-            <div className="w-full h-72 rounded-md flex items-start justify-center mt-4 py-4 bg-transparent">
+            <div className="w-full h-72 rounded-md flex items-start flex-col justify-center mt-4 py-4 bg-transparent">
               {(() => {
                 // determine gender from user messages
                 const genderMsg = messages.find(
@@ -643,68 +643,95 @@ export const StaticChat = ({
                     ["kobieta", "mężczyzna"].includes(m.content.toLowerCase())
                 );
                 const gender = genderMsg?.content.toLowerCase();
-                const sickYears = gender === "kobieta" ? 2.4 : 2.1; // default to male value
+                const sickYears = gender === "kobieta" ? 2.5 : 2; // default to male value
                 const sickText = sickYears.toLocaleString("pl-PL", {
                   minimumFractionDigits: 1,
                   maximumFractionDigits: 1,
                 });
 
                 return (
-                  <Message
-                    id={`bot-${Date.now()}`}
-                    type="bot"
-                    title="Podsumowanie zwolnień"
-                    content={`Przez całe życie możesz spędzić nawet ${sickText} lat na zwolnieniu lekarskim.
-A jak wygląda Twoja emerytura w porównaniu z innymi? Sprawdź!`}
-                  />
+                  <>
+                    {/* Full-width summary header */}
+                    <Message
+                      id={`bot-${Date.now()}`}
+                      type="bot"
+                      title="Podsumowanie zwolnień"
+                      content={`Przez całe życie możesz spędzić ponad ${sickText} lat na zwolnieniu lekarskim!`}
+                    />
+
+                    {/* Two-column layout: text + chart */}
+                    <div className="mt-4 w-full flex flex-col md:flex-row gap-6 items-start">
+                      <div className="md:w-1/2 w-full mt-4">
+                        <Message
+                          id={`bot-${Date.now() + 1}`}
+                          type="bot"
+                          title="Porównanie emerytury"
+                          content="A teraz sprawdz jak wygląda Twoja emerytura w porównaniu z innymi!"
+                        />
+                      </div>
+                      <div className="md:w-1/2 w-full">
+                        {desiredPension ? (
+                          (() => {
+                            const chartData = [
+                              { name: "min", value: MIN_PENSION },
+                              {
+                                name: "min-śr",
+                                value: Math.round(
+                                  (MIN_PENSION + AVG_PENSION) / 2
+                                ),
+                              },
+                              { name: "> śr", value: AVG_PENSION },
+                              { name: "wys", value: HIGH_PENSION },
+                              { name: "Cel", value: desiredPension },
+                            ].sort((a, b) => a.value - b.value);
+                            const goalIdx = chartData.findIndex(
+                              (d) => d.name === "Cel"
+                            );
+                            return (
+                              <ChartContainer
+                                config={{
+                                  bar: { color: "#3f84d2", label: "Kwota" },
+                                }}
+                                className="w-full h-full"
+                              >
+                                <BarChart data={chartData}>
+                                  <CartesianGrid strokeDasharray="3 3" />
+                                  <XAxis dataKey="name" />
+                                  {/* Tooltip only, cursor color via CSS */}
+                                  <ChartTooltip content={<CustomTooltip />} />
+                                  <ChartLegend
+                                    content={<ChartLegendContent />}
+                                  />
+                                  <Bar
+                                    dataKey="value"
+                                    name="Kwota"
+                                    radius={[8, 8, 0, 0]}
+                                  >
+                                    {chartData.map((entry, idx) => (
+                                      <Cell
+                                        key={`cell-${idx}`}
+                                        fill={
+                                          entry.name === "Cel"
+                                            ? PRIMARY_HEX
+                                            : SECONDARY_HEX
+                                        }
+                                      />
+                                    ))}
+                                  </Bar>
+                                </BarChart>
+                              </ChartContainer>
+                            );
+                          })()
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            Ładowanie danych...
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </>
                 );
               })()}
-
-              {desiredPension ? (
-                (() => {
-                  const chartData = [
-                    { name: "min", value: MIN_PENSION },
-                    {
-                      name: "min-śr",
-                      value: Math.round((MIN_PENSION + AVG_PENSION) / 2),
-                    },
-                    { name: "> śr", value: AVG_PENSION },
-                    { name: "wys", value: HIGH_PENSION },
-                    { name: "Cel", value: desiredPension },
-                  ].sort((a, b) => a.value - b.value);
-                  const goalIdx = chartData.findIndex((d) => d.name === "Cel");
-                  return (
-                    <ChartContainer
-                      config={{ bar: { color: "#3f84d2", label: "Kwota" } }}
-                      className="w-full h-full"
-                    >
-                      <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        {/* Tooltip only, cursor color via CSS */}
-                        <ChartTooltip content={<CustomTooltip />} />
-                        <ChartLegend content={<ChartLegendContent />} />
-                        <Bar dataKey="value" name="Kwota" radius={[8, 8, 0, 0]}>
-                          {chartData.map((entry, idx) => (
-                            <Cell
-                              key={`cell-${idx}`}
-                              fill={
-                                entry.name === "Cel"
-                                  ? PRIMARY_HEX
-                                  : SECONDARY_HEX
-                              }
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ChartContainer>
-                  );
-                })()
-              ) : (
-                <span className="text-sm text-muted-foreground">
-                  Ładowanie danych...
-                </span>
-              )}
             </div>
           )}
           {/* Option buttons */}
