@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MultiRange } from "@/components/ui/multi-range";
 import RangesPanel from "@/components/ui/ranges-list";
+import { UserDataPanel } from "@/components/ui/user-data-panel";
 
 const DATA = {
   emerytura_nominalna_miesieczna_brutto: 3250.88,
@@ -90,6 +91,15 @@ const DATA = {
   ],
 };
 
+const USER_DATA = {
+  desired_pension_amount: 5000,
+  age: 35,
+  gender: "male",
+  current_salary: 8000,
+  konto_zus: DATA.kapital_emerytalny.konto,
+  subkonto_zus: DATA.kapital_emerytalny.subkonto,
+};
+
 const Dashboard = () => {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
   const [numberOfChildren, setNumberOfChildren] = useState(3);
@@ -97,6 +107,9 @@ const Dashboard = () => {
   const [startAge, setStartAge] = useState<number | null>();
   const [endAge, setEndAge] = useState<number | null>();
   const [validationError, setValidationError] = useState<string>("");
+  const [kodPocztowy, setKodPocztowy] = useState("00-000");
+
+  const [userData, setUserData] = useState(USER_DATA);
 
   // TODO: Replace with API call
   const [messages, setMessages] = useState([]);
@@ -106,16 +119,14 @@ const Dashboard = () => {
       id: Date.now().toString(),
       title: message,
       description: "",
-      isUser: true
+      isUser: true,
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
   };
 
   const handleAddRange = () => {
     if (startAge && endAge && startAge >= 16 && startAge < endAge) {
-      const newValues = [...values, startAge, endAge].sort(
-        (a, b) => a - b,
-      );
+      const newValues = [...values, startAge, endAge].sort((a, b) => a - b);
       setValues(newValues);
       setStartAge(null);
       setEndAge(null);
@@ -123,7 +134,7 @@ const Dashboard = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleAddRange();
     }
   };
@@ -140,7 +151,7 @@ const Dashboard = () => {
         <h1 className="w-full text-[36px] font-bold">
           Twój panel <span className="text-primary">emerytalny</span>
         </h1>
-        <RetirementQuota 
+        <RetirementQuota
           expectedAmount={7829}
           calculatedAmount={4829}
           onAddToChat={handleAddToChat}
@@ -150,9 +161,15 @@ const Dashboard = () => {
             Ścieżka życia <Info className="w-4 h-4 ml-2 " />
           </h2>
           <MultiRange values={values} onChange={setValues} className={"mt-8"} />
-          <RangesPanel values={values} setValues={setValues} onAddToChat={handleAddToChat} />
+          <RangesPanel
+            values={values}
+            setValues={setValues}
+            onAddToChat={handleAddToChat}
+          />
           <div className="mt-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Dodaj nowy zakres pracy</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">
+              Dodaj nowy zakres pracy
+            </h3>
             <div className="flex gap-4">
               <Input
                 type="number"
@@ -172,13 +189,18 @@ const Dashboard = () => {
                 onChange={(e) => setEndAge(parseInt(e.target.value))}
                 onKeyPress={handleKeyPress}
               />
-              <Button onClick={handleAddRange}>
-                Dodaj zakres
-              </Button>
+              <Button onClick={handleAddRange}>Dodaj zakres</Button>
             </div>
           </div>
         </div>
-        
+
+        <UserDataPanel 
+          userData={userData}
+          onUserDataChange={setUserData}
+          kodPocztowy={kodPocztowy}
+          onKodPocztowyChange={setKodPocztowy}
+        />
+
         {/* Ilość dzieci - separate component */}
         <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
           <SelectionField
@@ -202,10 +224,7 @@ const Dashboard = () => {
       </div>
       <div className="w-[40%] h-full overflow-visible">
         <div className="sticky top-16 w-full h-[640px] overflow-hidden">
-          <ChatPanel 
-            messages={messages} 
-            userData={DATA}
-          />
+          <ChatPanel messages={messages} userData={DATA} />
         </div>
       </div>
     </div>
