@@ -190,7 +190,7 @@ export function MultiRange({
           return (
             <button key={key} {...handleProps} className="focus:outline-none">
               <div
-                className={`bg-primary flex items-center justify-center w-8 h-8 rounded-full text-xs text-white shadow-lg transform transition-all ${
+                className={`bg-primary cursor-pointer flex items-center justify-center w-8 h-8 rounded-full text-xs text-white shadow-lg transform transition-all ${
                   active
                     ? "translate-y-[-100%] scale-110"
                     : "translate-y-0 scale-90"

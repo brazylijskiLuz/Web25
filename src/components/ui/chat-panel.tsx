@@ -272,7 +272,7 @@ export function ChatPanel({
         <button
           type="button"
           onClick={handleSend}
-          className="p-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-3 bg-primary cursor-pointer text-white rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!inputValue.trim() || isLoading}
           aria-label="Wyślij wiadomość"
         >

@@ -349,7 +349,7 @@ const Results = () => {
       {/* Fixed CTA Button in bottom right corner */}
       <button
         onClick={() => router.push("/dashboard")}
-        className="fixed bottom-8 right-8 bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg z-50 border border-gray-200"
+        className="fixed bottom-8 cursor-pointer right-8 bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg z-50 border border-gray-200"
       >
         Przejdź do panelu głównego
       </button>
