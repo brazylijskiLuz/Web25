@@ -117,7 +117,7 @@ export default function RangesPanel({
                         Praca #{idx + 1}
                       </div>
                       <div className="text-base font-medium">
-                        {r.start} — {r.end} ({r.length} lat)
+                        {r.start >= 0 ? r.start : 0} — {r.end} ({r.length} lat)
                       </div>
                     </div>
                     <div>

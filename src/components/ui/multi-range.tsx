@@ -122,7 +122,7 @@ export function MultiRange({
                   style={{ transform: "translate(-50%, 32px)" }}
                   className="text-xs text-gray-500 whitespace-nowrap"
                 >
-                  {t.value}
+                  {t.value >= 0 ? t.value : 0}
                 </div>
               </div>
             ))
@@ -144,7 +144,7 @@ export function MultiRange({
                     style={{ transform: "translate(-50%, 32px)" }}
                     className="text-xs text-gray-500 whitespace-nowrap"
                   >
-                    {value}
+                    {value >= 0 ? value : 0}
                   </div>
                 </div>
               );
@@ -189,7 +189,7 @@ export function MultiRange({
                     : "translate-y-0 scale-90"
                 }`}
               >
-                {value}
+                {value >= 0 ? value : 0}
               </div>
             </button>
           );
