@@ -166,6 +166,10 @@ const Dashboard = () => {
     }
   };
 
+  useEffect(() => {
+    sendReportToAPI();
+  }, [userData, resultsData]);
+
   const downloadReport = () => {
     if (reportUrl) {
       window.open(reportUrl, "_blank");
