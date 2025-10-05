@@ -11,6 +11,8 @@ interface UserData {
   rok_rozpoczecia_pracy: number;
   rok_przejscia_na_emeryture: number;
   kod_pocztowy: string;
+  przerwy_w_pracy?: boolean;
+  przerwy_laczna_liczba_miesiecy?: number;
 }
 
 interface UserDataStore {

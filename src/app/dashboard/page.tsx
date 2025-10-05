@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { MultiRange } from "@/components/ui/multi-range";
 import RangesPanel from "@/components/ui/ranges-list";
 import { UserDataPanel } from "@/components/ui/user-data-panel";
+import { useFormatted } from "@/stores/useFormatted";
 
 const DATA = {
   emerytura_nominalna_miesieczna_brutto: 3250.88,
@@ -116,9 +117,54 @@ const Dashboard = () => {
   const [startAge, setStartAge] = useState<number | null>();
   const [endAge, setEndAge] = useState<number | null>();
   const [validationError, setValidationError] = useState<string>("");
+
+  // Calculate gaps from values and update userData
+  const updatePrzeruuData = (currentValues: number[]) => {
+    const ranges: Array<{ start: number; end: number }> = [];
+    for (let i = 0; i < currentValues.length; i += 2) {
+      const a = currentValues[i];
+      const b = currentValues[i + 1];
+      if (typeof a === "number" && typeof b === "number") {
+        const start = Math.min(a, b);
+        const end = Math.max(a, b);
+        ranges.push({ start, end });
+      }
+    }
+
+    const gaps: Array<{ start: number; end: number; length: number }> = [];
+    if (ranges.length > 1) {
+      const sortedRanges = [...ranges].sort((a, b) => a.start - b.start);
+      for (let i = 0; i < sortedRanges.length - 1; i++) {
+        const currentEnd = sortedRanges[i].end;
+        const nextStart = sortedRanges[i + 1].start;
+        if (nextStart > currentEnd) {
+          gaps.push({
+            start: currentEnd,
+            end: nextStart,
+            length: nextStart - currentEnd,
+          });
+        }
+      }
+    }
+
+    const hasPrzerwy = gaps.length > 0;
+    const totalGapYears = gaps.reduce((sum, gap) => sum + gap.length, 0);
+    const totalGapMonths = totalGapYears * 12;
+
+    setUserData({
+      przerwy_w_pracy: hasPrzerwy,
+      przerwy_laczna_liczba_miesiecy: totalGapMonths,
+    });
+  };
+
+  // Update przerwy data when values change
+  useEffect(() => {
+    updatePrzeruuData(values);
+  }, [values, setUserData]);
   const [kodPocztowy, setKodPocztowy] = useState(userData.kod_pocztowy || null);
 
   const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // TODO: Replace with API call
   const [messages, setMessages] = useState([]);
@@ -176,6 +222,122 @@ const Dashboard = () => {
     }
   };
 
+  const { formatted } = useFormatted();
+
+  const regenerateWithNewConditions = async () => {
+    setIsRegenerating(true);
+
+    try {
+      // Create formatted content from userData
+      let formattedContent = "Dane użytkownika (obowiązkowe):\n";
+      formattedContent += `wiek: ${userData.age || ""}\n`;
+      formattedContent += `plec: "${userData.gender || ""}"\n`;
+      formattedContent += `wynagrodzenie_brutto: ${
+        userData.current_salary || ""
+      }\n`;
+      formattedContent += `rok_rozpoczecia_pracy: ${
+        userData.rok_rozpoczecia_pracy || ""
+      }\n`;
+
+      // Calculate rok_zakonczenia_pracy based on gender
+      const endAge = userData.gender === "male" ? 65 : 60;
+      const currentYear = new Date().getFullYear();
+      const birthYear = currentYear - userData.age;
+      const rok_zakonczenia_pracy = birthYear + endAge;
+      formattedContent += `rok_zakonczenia_pracy: ${rok_zakonczenia_pracy}`;
+
+      // Add optional data if present
+      if (
+        userData.przerwy_w_pracy ||
+        userData.przerwy_laczna_liczba_miesiecy ||
+        userData.konto_zus ||
+        userData.subkonto_zus
+      ) {
+        formattedContent += "\n\nDane użytkownika (opcjonalne):";
+        if (userData.przerwy_w_pracy !== undefined) {
+          formattedContent += `\nprzerwy_w_pracy: ${userData.przerwy_w_pracy}`;
+        }
+        if (userData.przerwy_laczna_liczba_miesiecy) {
+          formattedContent += `\nprzerwy_laczna_liczba_miesiecy: ${userData.przerwy_laczna_liczba_miesiecy}`;
+        }
+        if (userData.konto_zus) {
+          formattedContent += `\nsrodki_na_koncie_zus: ${userData.konto_zus}`;
+        }
+        if (userData.subkonto_zus) {
+          formattedContent += `\nsrodki_na_subkoncie_zus: ${userData.subkonto_zus}`;
+        }
+      }
+      console.warn(formattedContent);
+      const response = await fetch("/api/regenerate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          beforeInput: formatted,
+          afterInput: formattedContent,
+          beforeOutput: resultsData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      let fullResponse = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullResponse += new TextDecoder().decode(value);
+        }
+      }
+
+      // Parse the JSON response
+      try {
+        // The streaming response might have extra data, so we need to extract just the JSON
+        // Find the last complete JSON object in the response
+        const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
+        console.log("jsonMatch", jsonMatch);
+        if (jsonMatch) {
+          const parsedData = JSON.parse(jsonMatch[0]);
+          console.log("Parsed data:", parsedData);
+
+          // Validate that the parsed data has the required fields
+          if (
+            parsedData &&
+            typeof parsedData === "object" &&
+            "emerytura_nominalna_miesieczna_brutto" in parsedData &&
+            "kapital_emerytalny" in parsedData
+          ) {
+            // Update the results data with the new calculation
+            setResultsData(parsedData);
+            console.log(
+              "Successfully updated results data with regenerated values"
+            );
+          } else {
+            console.error(
+              "Parsed data is missing required fields:",
+              parsedData
+            );
+            console.error("Regeneration failed - invalid response format");
+          }
+        } else {
+          console.error("No JSON found in response:", fullResponse);
+        }
+      } catch (parseError) {
+        console.error("Error parsing regenerate response:", parseError);
+        console.error("Full response was:", fullResponse);
+      }
+    } catch (error) {
+      console.error("Error regenerating with new conditions:", error);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   const handleAddToChat = (message: string) => {
     const newMessage = {
       id: Date.now().toString(),
@@ -216,17 +378,47 @@ const Dashboard = () => {
   }, [resultsData, setResultsData]);
 
   return (
-    <div className="flex w-full h-screen overflow-hidden mt-14">
+    <div
+      className={`flex w-full h-screen overflow-hidden mt-14 relative ${
+        isRegenerating ? "cursor-wait" : ""
+      }`}
+    >
+      {/* Loading Overlay */}
+      {isRegenerating && (
+        <div className="absolute top-4 left-4 right-4 bg-white bg-opacity-95 border border-gray-200 rounded-lg shadow-lg z-50 p-6">
+          <div className="flex items-center gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary flex-shrink-0"></div>
+            <div>
+              <h3 className="font-semibold text-gray-800">
+                Obliczam nowe prognozy
+              </h3>
+              <p className="text-sm text-gray-600">
+                Analizuję zaktualizowane dane...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-[60%] overflow-y-auto pr-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="w-full text-[36px] font-bold">
             Twój panel <span className="text-primary">emerytalny</span>
           </h1>
-          {reportUrl && (
-            <Button onClick={downloadReport} className="ml-4">
-              Pobierz raport
+          <div className="flex gap-4">
+            <Button
+              onClick={regenerateWithNewConditions}
+              variant="outline"
+              disabled={isRegenerating}
+            >
+              {isRegenerating
+                ? "Obliczam..."
+                : "Oblicz ponownie z nowymi warunkami"}
             </Button>
-          )}
+            {reportUrl && (
+              <Button onClick={downloadReport}>Pobierz raport</Button>
+            )}
+          </div>
         </div>
         <RetirementQuota
           expectedAmount={userData.desired_pension_amount}
