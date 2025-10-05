@@ -6,6 +6,10 @@ import { Info } from "lucide-react";
 import { SelectionField } from "@/components/ui/selection-field";
 import { ChatPanel } from "@/components/ui/chat-panel";
 import { RetirementQuota } from "@/components/ui/retirement-quota";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MultiRange } from "@/components/ui/multi-range";
+import RangesPanel from "@/components/ui/ranges-list";
 
 const DATA = {
   emerytura_nominalna_miesieczna_brutto: 3250.88,
@@ -89,6 +93,10 @@ const DATA = {
 const Dashboard = () => {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
   const [numberOfChildren, setNumberOfChildren] = useState(3);
+  const [values, setValues] = useState<number[]>([25, 65]);
+  const [startAge, setStartAge] = useState<number | null>();
+  const [endAge, setEndAge] = useState<number | null>();
+  const [validationError, setValidationError] = useState<string>("");
 
   // TODO: Replace with API call
   const [messages, setMessages] = useState([]);
@@ -101,6 +109,23 @@ const Dashboard = () => {
       isUser: true
     };
     setMessages(prev => [...prev, newMessage]);
+  };
+
+  const handleAddRange = () => {
+    if (startAge && endAge && startAge >= 16 && startAge < endAge) {
+      const newValues = [...values, startAge, endAge].sort(
+        (a, b) => a - b,
+      );
+      setValues(newValues);
+      setStartAge(null);
+      setEndAge(null);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAddRange();
+    }
   };
 
   useEffect(() => {
@@ -124,7 +149,38 @@ const Dashboard = () => {
           <h2 className="items-center flex font-bold text-[24px] mb-8">
             Ścieżka życia <Info className="w-4 h-4 ml-2 " />
           </h2>
-          {/* Example usage of SelectionField */}
+          <MultiRange values={values} onChange={setValues} className={"mt-8"} />
+          <RangesPanel values={values} setValues={setValues} />
+          <div className="mt-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Dodaj nowy zakres pracy</h3>
+            <div className="flex gap-4">
+              <Input
+                type="number"
+                placeholder="Początek (min. 16)"
+                min={16}
+                max={100}
+                value={startAge || ""}
+                onChange={(e) => setStartAge(parseInt(e.target.value))}
+                onKeyPress={handleKeyPress}
+              />
+              <Input
+                type="number"
+                placeholder="Koniec"
+                min={16}
+                max={100}
+                value={endAge || ""}
+                onChange={(e) => setEndAge(parseInt(e.target.value))}
+                onKeyPress={handleKeyPress}
+              />
+              <Button onClick={handleAddRange}>
+                Dodaj zakres
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Ilość dzieci - separate component */}
+        <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
           <SelectionField
             title="Ilość dzieci"
             description="Tutaj opis jak to wpływa na kwotę wyliczonej emerytury"

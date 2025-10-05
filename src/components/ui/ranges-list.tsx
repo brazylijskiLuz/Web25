@@ -27,8 +27,30 @@ export default function RangesPanel({
   const ranges = useMemo(() => normalizePairs(values), [values]);
   const total = useMemo(
     () => ranges.reduce((s, r) => s + r.length, 0),
-    [ranges],
+    [ranges]
   );
+
+  const gaps = useMemo(() => {
+    if (ranges.length <= 1) return [];
+    
+    const sortedRanges = [...ranges].sort((a, b) => a.start - b.start);
+    const gaps: { start: number; end: number; length: number }[] = [];
+    
+    for (let i = 0; i < sortedRanges.length - 1; i++) {
+      const currentEnd = sortedRanges[i].end;
+      const nextStart = sortedRanges[i + 1].start;
+      
+      if (nextStart > currentEnd) {
+        gaps.push({
+          start: currentEnd,
+          end: nextStart,
+          length: nextStart - currentEnd
+        });
+      }
+    }
+    
+    return gaps;
+  }, [ranges]);
 
   const removeRange = (rangeIndex: number) => {
     // never remove last range
@@ -52,7 +74,7 @@ export default function RangesPanel({
       // if removing would leave zero pairs, don't do it
       if (values.length <= 2) return;
       const newVals = values.filter(
-        (_, i) => i !== pairIndex && i !== pairIndex + 1,
+        (_, i) => i !== pairIndex && i !== pairIndex + 1
       );
       setValues(newVals);
       return;
@@ -73,42 +95,95 @@ export default function RangesPanel({
           <div className="text-sm text-gray-500">Brak zakresów</div>
         )}
 
-        {ranges.map((r, idx) => {
+{[...ranges].sort((a, b) => a.start - b.start).map((r, idx, sortedRanges) => {
           const isOnlyOne = ranges.length === 1;
+          const originalIndex = ranges.findIndex(orig => orig.start === r.start && orig.end === r.end);
+          
           return (
-            <div
-              key={idx}
-              className="flex items-center justify-between gap-3 bg-gray-50 p-3 rounded"
-            >
-              <div>
-                <div className="text-sm text-gray-600">Zakres #{idx + 1}</div>
-                <div className="text-base font-medium">
-                  {r.start} — {r.end} ({r.length} lat)
+            <React.Fragment key={`${r.start}-${r.end}`}>
+              <div className="flex items-center justify-between gap-3 bg-green-50 p-3 rounded border-l-4 border-green-500">
+                <div>
+                  <div className="text-sm text-green-600">Praca #{idx + 1}</div>
+                  <div className="text-base font-medium">
+                    {r.start} — {r.end} ({r.length} lat)
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {!isOnlyOne && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => removeRange(originalIndex)}
+                      title="Usuń zakres"
+                    >
+                      Usuń
+                    </Button>
+                  )}
                 </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="destructive"
-                  onClick={() => removeRange(idx)}
-                  disabled={isOnlyOne}
-                  title={
-                    isOnlyOne
-                      ? "Musisz zostawić przynajmniej jeden zakres"
-                      : "Usuń zakres"
-                  }
-                >
-                  Usuń
-                </Button>
-              </div>
-            </div>
+              
+              {/* Show gap after this range if it exists */}
+              {idx < sortedRanges.length - 1 && (() => {
+                const currentEnd = r.end;
+                const nextStart = sortedRanges[idx + 1].start;
+                
+                if (nextStart > currentEnd) {
+                  const gapLength = nextStart - currentEnd;
+                  return (
+                    <div className="flex items-center justify-between gap-3 bg-red-50 p-3 rounded border-l-4 border-red-500">
+                      <div>
+                        <div className="text-sm text-red-600">Przerwa</div>
+                        <div className="text-base font-medium">
+                          {currentEnd} — {nextStart} ({gapLength} lat)
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            // Merge the current range with the next range by removing the gap
+                            const currentRangeIndex = ranges.findIndex(orig => orig.start === r.start && orig.end === r.end);
+                            const nextRangeIndex = ranges.findIndex(orig => orig.start === nextStart);
+                            
+                            if (currentRangeIndex !== -1 && nextRangeIndex !== -1) {
+                              const newValues = [...values];
+                              const currentPairIndex = currentRangeIndex * 2;
+                              const nextPairIndex = nextRangeIndex * 2;
+                              
+                              // Get the end of the next range
+                              const nextRangeEnd = newValues[nextPairIndex + 1];
+                              
+                              // Update current range end to next range end (merging ranges)
+                              newValues[currentPairIndex + 1] = nextRangeEnd;
+                              
+                              // Remove the next range pair entirely
+                              const filteredValues = newValues.filter((_, i) => 
+                                i !== nextPairIndex && i !== nextPairIndex + 1
+                              );
+                              
+                              setValues(filteredValues);
+                            }
+                          }}
+                          title="Usuń przerwę (połącz zakresy)"
+                        >
+                          Usuń
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </React.Fragment>
           );
         })}
       </div>
 
-      <div className="mt-6">
-        <div className="text-sm text-gray-600">Łączny okres pracy</div>
-        <div className="text-2xl font-semibold">{total} lat</div>
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="text-sm font-medium text-blue-700 mb-1">
+          Łączny okres pracy
+        </div>
+        <div className="text-lg font-semibold text-blue-900">{total} lat</div>
       </div>
     </div>
   );
