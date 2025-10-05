@@ -20,11 +20,11 @@ export const Title = ({
         isHidden ? "-translate-y-[30vh] opacity-0" : "translate-y-0 opacity-100"
       )}
     >
-      <h1 className="text-4xl font-extrabold max-w-[120] text-center">
+      <h1 className="text-4xl font-extrabold max-w-[400px] text-center">
         Poznaj swój przyszły plan{" "}
         <span className="text-primary">emerytalny</span>.
       </h1>
-      <Button className="mt-14" onClick={onStartClick}>
+      <Button size={"lg"} className="mt-14" onClick={onStartClick}>
         Rozpocznij
       </Button>
     </div>
