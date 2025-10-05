@@ -117,7 +117,7 @@ export default function RangesPanel({
                         Praca #{idx + 1}
                       </div>
                       <div className="text-base font-medium">
-                        {r.start} — {r.end} ({r.length} lat)
+                        {r.start >= 0 ? r.start : 0} — {r.end} ({r.length} lat)
                       </div>
                     </div>
                     <div>
@@ -171,7 +171,7 @@ export default function RangesPanel({
                                   `Jak ${selectedType} wpływa na emeryturę?`;
                                 onAddToChat(question);
                               }}
-                              className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs rounded transition-colors cursor-pointer border border-green-300 whitespace-nowrap"
+                              className="px-2 cursor-pointer py-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs rounded transition-colors cursor-pointer border border-green-300 whitespace-nowrap"
                             >
                               Jak to wpływa?
                             </button>
@@ -350,7 +350,7 @@ export default function RangesPanel({
               onClick={() =>
                 onAddToChat("Jak okres pracy wpływa na emeryturę?")
               }
-              className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs rounded-full transition-colors cursor-pointer border border-blue-300"
+              className="px-3 py-1  bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs rounded-full transition-colors cursor-pointer border border-blue-300"
             >
               Jak okres pracy wpływa na emeryturę?
             </button>

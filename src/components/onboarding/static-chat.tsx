@@ -689,7 +689,7 @@ export const StaticChat = ({
       // show after 1s of no further typing
       validationTimerRef.current = setTimeout(
         () => setValidationError(err),
-        1000
+        800
       );
     }
 
@@ -707,13 +707,13 @@ export const StaticChat = ({
 
   const [randomFact, setRandomFact] = useState(() => getRandomFact());
 
-  // Change random fact every 3 seconds during loading
+  // Change random fact every 4 seconds during loading
   useEffect(() => {
     if (!showSpinner) return;
 
     const interval = setInterval(() => {
       setRandomFact(getRandomFact());
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [showSpinner]);

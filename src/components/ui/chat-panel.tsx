@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChatMessage } from "./chat-message";
 import { Input } from "./input";
 import { Send } from "lucide-react";
@@ -19,12 +19,18 @@ interface ChatPanelProps {
   resultsData?: any;
 }
 
-export function ChatPanel({ messages, onSendMessage, userData, resultsData }: ChatPanelProps) {
+export function ChatPanel({
+  messages,
+  onSendMessage,
+  userData,
+  resultsData,
+}: ChatPanelProps) {
   const [inputValue, setInputValue] = useState("");
   const [internalMessages, setInternalMessages] = useState<Message[]>(messages);
   const [isLoading, setIsLoading] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
+  const lastProcessedMessagesLength = useRef(0);
 
   const scrollToBottom = () => {
     const container = messagesContainerRef.current;
@@ -39,22 +45,6 @@ export function ChatPanel({ messages, onSendMessage, userData, resultsData }: Ch
     }
   }, [messages, internalMessages.length]);
 
-  // Handle new messages from external source (like button clicks)
-  useEffect(() => {
-    if (messages.length > internalMessages.length) {
-      const newMessages = messages.slice(internalMessages.length);
-      const updatedMessages = [...internalMessages, ...newMessages];
-      setInternalMessages(updatedMessages);
-      
-      // Check if the last new message is from user - if so, trigger API call
-      const lastNewMessage = newMessages[newMessages.length - 1];
-      if (lastNewMessage?.isUser && !isLoading) {
-        // Trigger AI response for the new user message
-        handleApiCall(updatedMessages);
-      }
-    }
-  }, [messages]);
-
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -66,107 +56,138 @@ export function ChatPanel({ messages, onSendMessage, userData, resultsData }: Ch
     }
   }, [internalMessages]);
 
-  const handleApiCall = async (messagesToSend: Message[]) => {
-    setIsLoading(true);
+  const handleApiCall = useCallback(
+    async (messagesToSend: Message[]) => {
+      setIsLoading(true);
 
-    try {
-      console.log("📡 Calling dashboard-chat API...");
-      
-      // Prepare messages for API (convert to OpenAI format)
-      const apiMessages = messagesToSend.map(msg => ({
-        role: msg.isUser ? "user" : "assistant",
-        content: msg.title + (msg.description ? `\n${msg.description}` : '')
-      }));
+      try {
+        console.log("📡 Calling dashboard-chat API...");
 
-      console.log("📦 API messages:", apiMessages);
-      console.log("📊 User data:", userData);
-      console.log("📊 Results data:", resultsData);
+        // Prepare messages for API (convert to OpenAI format)
+        const apiMessages = messagesToSend.map((msg) => ({
+          role: msg.isUser ? "user" : "assistant",
+          content: msg.title + (msg.description ? `\n${msg.description}` : ""),
+        }));
 
-      const response = await fetch('/api/dashboard-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: apiMessages,
-          userData: userData,
-          resultsData: resultsData
-        }),
-      });
+        console.log("📦 API messages:", apiMessages);
+        console.log("📊 User data:", userData);
+        console.log("📊 Results data:", resultsData);
 
-      console.log("📡 Response status:", response.status);
-      console.log("📡 Response ok:", response.ok);
+        const response = await fetch("/api/dashboard-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: apiMessages,
+            userData: userData,
+            resultsData: resultsData,
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error("❌ API Error:", errorData);
-        throw new Error(`API call failed: ${response.status}`);
+        console.log("📡 Response status:", response.status);
+        console.log("📡 Response ok:", response.ok);
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error("❌ API Error:", errorData);
+          throw new Error(`API call failed: ${response.status}`);
+        }
+
+        // Handle streaming response
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error("No response body");
+        }
+
+        // Add AI message placeholder with loading state
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          title: "Pracuję nad Twoim zapytaniem...",
+          description: "",
+          isUser: false,
+        };
+
+        setInternalMessages((prev) => [...prev, aiMessage]);
+        scrollToBottom(); // Scroll to show loading message
+
+        let aiResponseText = "";
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          aiResponseText += chunk;
+
+          // Update AI message with streamed content (replace loading message only when we have actual content)
+          setInternalMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessage.id
+                ? {
+                    ...msg,
+                    title: aiResponseText.trim()
+                      ? aiResponseText
+                      : "Pracuję nad Twoim zapytaniem...",
+                  }
+                : msg
+            )
+          );
+
+          // Auto-scroll during AI response
+          scrollToBottom();
+        }
+
+        console.log("✅ AI response complete:", aiResponseText);
+      } catch (error) {
+        console.error("💥 Error sending message:", error);
+
+        // Add error message
+        const errorMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          title: "Przepraszam, wystąpił błąd podczas komunikacji z AI.",
+          description: "Spróbuj ponownie za chwilę.",
+          isUser: false,
+        };
+
+        setInternalMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [userData, resultsData]
+  );
 
-      // Handle streaming response
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body');
+  const handleApiCallRef = useRef(handleApiCall);
+
+  // Update the ref whenever handleApiCall changes
+  useEffect(() => {
+    handleApiCallRef.current = handleApiCall;
+  }, [handleApiCall]);
+
+  // Handle new messages from external source (like button clicks)
+  useEffect(() => {
+    if (messages.length > lastProcessedMessagesLength.current) {
+      const newMessages = messages.slice(lastProcessedMessagesLength.current);
+      const updatedMessages = [...internalMessages, ...newMessages];
+      setInternalMessages(updatedMessages);
+      lastProcessedMessagesLength.current = messages.length;
+
+      // Check if the last new message is from user - if so, trigger API call
+      const lastNewMessage = newMessages[newMessages.length - 1];
+      if (lastNewMessage?.isUser && !isLoading) {
+        // Trigger AI response for the new user message
+        handleApiCallRef.current(updatedMessages);
       }
-
-      // Add AI message placeholder with loading state
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        title: "Pracuję nad Twoim zapytaniem...",
-        description: "",
-        isUser: false,
-      };
-
-      setInternalMessages(prev => [...prev, aiMessage]);
-      scrollToBottom(); // Scroll to show loading message
-
-      let aiResponseText = "";
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        aiResponseText += chunk;
-
-        // Update AI message with streamed content (replace loading message only when we have actual content)
-        setInternalMessages(prev => 
-          prev.map(msg => 
-            msg.id === aiMessage.id 
-              ? { ...msg, title: aiResponseText.trim() ? aiResponseText : "Pracuję nad Twoim zapytaniem..." }
-              : msg
-          )
-        );
-
-        // Auto-scroll during AI response
-        scrollToBottom();
-      }
-
-      console.log("✅ AI response complete:", aiResponseText);
-
-    } catch (error) {
-      console.error("💥 Error sending message:", error);
-      
-      // Add error message
-      const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        title: "Przepraszam, wystąpił błąd podczas komunikacji z AI.",
-        description: "Spróbuj ponownie za chwilę.",
-        isUser: false,
-      };
-
-      setInternalMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [messages, internalMessages, isLoading]);
 
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
 
     console.log("🚀 Sending message:", inputValue);
-    
+
     // Add user message immediately
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -179,9 +200,9 @@ export function ChatPanel({ messages, onSendMessage, userData, resultsData }: Ch
     setInternalMessages(updatedMessages);
 
     setInputValue("");
-    
+
     // Call API with the updated messages
-    await handleApiCall(updatedMessages);
+    await handleApiCallRef.current(updatedMessages);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -242,14 +263,16 @@ export function ChatPanel({ messages, onSendMessage, userData, resultsData }: Ch
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={isLoading ? "AI odpowiada..." : "Zadaj pytanie o emeryturę..."}
+          placeholder={
+            isLoading ? "AI odpowiada..." : "Zadaj pytanie o emeryturę..."
+          }
           className="flex-1"
           disabled={isLoading}
         />
         <button
           type="button"
           onClick={handleSend}
-          className="p-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-3 bg-primary cursor-pointer text-white rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!inputValue.trim() || isLoading}
           aria-label="Wyślij wiadomość"
         >

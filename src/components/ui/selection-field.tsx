@@ -38,7 +38,7 @@ export function SelectionField({
           <button
             type="button"
             onClick={onInfoClick}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1 hover:bg-gray-100 cursor-pointer rounded-full transition-colors"
             aria-label="Informacja"
           >
             <Info className="w-5 h-5 text-gray-600" />
@@ -68,7 +68,7 @@ export function SelectionField({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "px-6 py-3 rounded-full text-[16px] font-medium transition-all",
+              "px-6 py-3 rounded-full text-[16px cursor-pointer font-medium transition-all",
               "border-2",
               value === option.value
                 ? "bg-primary text-white border-primary shadow-md"

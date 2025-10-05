@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useResultsData from "@/stores/useResultsData";
 import { useHideAvatarGraphics } from "@/hooks/useHideAvatarGraphics";
+import { Button } from "@/components/ui/button";
 
 interface ScenariuszDluzszejPracy {
   dodatkowe_lata: number;
@@ -338,12 +339,19 @@ const Results = () => {
         </div>
       </div>
 
+      {/* <Button
+        variant={"default"}
+        onClick={() => router.push("/dashboard")}
+        className="fixed top-48 right-20 w-96 h-24 text-lg"
+      >
+        Przejdź do panelu głównego
+      </Button> */}
       {/* Fixed CTA Button in bottom right corner */}
       <button
         onClick={() => router.push("/dashboard")}
-        className="fixed bottom-8 right-8 bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg z-50 border border-gray-200"
+        className="fixed bottom-8 cursor-pointer right-8 bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg z-50 border border-gray-200"
       >
-        Przejść do panelu głównego
+        Przejdź do panelu głównego
       </button>
     </>
   );

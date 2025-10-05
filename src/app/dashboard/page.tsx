@@ -1,8 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useAvatar from "@/stores/useAvatar";
 import useUserData from "@/stores/useUserData";
+
+interface UserData {
+  desired_pension_amount: number;
+  age: number;
+  gender: string;
+  current_salary: number;
+  konto_zus: number;
+  subkonto_zus: number;
+  rok_rozpoczecia_pracy: number;
+  rok_przejscia_na_emeryture: number;
+  kod_pocztowy: string;
+  przerwy_w_pracy?: boolean;
+  przerwy_laczna_liczba_miesiecy?: number;
+}
 import useResultsData from "@/stores/useResultsData";
 import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
@@ -111,7 +125,10 @@ const Dashboard = () => {
     resultsData?.wiek_przejscia_na_emeryture || 0;
 
   const rokUrodzenia = 2025 - userData.age;
-  const [start, setStart] = useState(rokStartuPracy - rokUrodzenia);
+  // Fix: Calculate start age properly, default to 25 if rokStartuPracy is not set
+  const startAgeFromWorkYear =
+    rokStartuPracy > 0 ? rokStartuPracy - rokUrodzenia : 25;
+  const [start, setStart] = useState(Math.max(startAgeFromWorkYear, 16));
   const [end, setEnd] = useState(userData.gender === "male" ? 65 : 60);
 
   const [values, setValues] = useState<number[]>([start, end]);
@@ -168,7 +185,14 @@ const Dashboard = () => {
   const [isRegenerating, setIsRegenerating] = useState(false);
 
   // TODO: Replace with API call
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<
+    Array<{
+      id: string;
+      title: string;
+      description?: string;
+      isUser?: boolean;
+    }>
+  >([]);
 
   const sendReportToAPI = async () => {
     try {
@@ -339,16 +363,15 @@ const Dashboard = () => {
     }
   };
 
-  const handleAddToChat = (message: string) => {
+  const handleAddToChat = useCallback((message: string) => {
     const newMessage = {
       id: Date.now().toString(),
       title: message,
       description: "",
       isUser: true,
     };
-    //@ts-ignore
     setMessages((prev) => [...prev, newMessage]);
-  };
+  }, []);
 
   const handleAddRange = () => {
     if (startAge && endAge && startAge >= 16 && startAge < endAge) {
@@ -380,7 +403,7 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`flex w-full h-screen overflow-hidden mt-14 relative ${
+      className={`flex flex-col lg:flex-row w-full h-screen overflow-hidden mt-14 relative ${
         isRegenerating ? "cursor-wait" : ""
       }`}
     >
@@ -401,23 +424,26 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="w-[60%] overflow-y-auto pr-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="w-full text-[36px] font-bold">
+      <div className="w-full lg:w-[60%] overflow-y-auto pr-0 lg:pr-8">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+          <h1 className="w-full text-2xl sm:text-3xl lg:text-[36px] font-bold">
             Twój panel <span className="text-primary">emerytalny</span>
           </h1>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Button
               onClick={regenerateWithNewConditions}
               variant="outline"
               disabled={isRegenerating}
+              className="w-full sm:w-auto"
             >
               {isRegenerating
                 ? "Obliczam..."
                 : "Oblicz ponownie z nowymi warunkami"}
             </Button>
             {reportUrl && (
-              <Button onClick={downloadReport}>Pobierz raport</Button>
+              <Button onClick={downloadReport} className="w-full sm:w-auto">
+                Pobierz raport
+              </Button>
             )}
           </div>
         </div>
@@ -428,21 +454,25 @@ const Dashboard = () => {
           }
           onAddToChat={handleAddToChat}
         />
-        <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
-          <h2 className="items-center flex font-bold text-[24px] mb-8">
+        <div className="w-full rounded-2xl p-4 sm:p-6 bg-white shadow-2x mt-6 sm:mt-10">
+          <h2 className="items-center flex font-bold text-lg sm:text-xl lg:text-[24px] mb-6 sm:mb-8">
             Ścieżka życia <Info className="w-4 h-4 ml-2 " />
           </h2>
-          <MultiRange values={values} onChange={setValues} className={"mt-8"} />
+          <MultiRange
+            values={values}
+            onChange={setValues}
+            className={"mt-6 sm:mt-8"}
+          />
           <RangesPanel
             values={values}
             setValues={setValues}
             onAddToChat={handleAddToChat}
           />
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <h3 className="text-sm font-medium text-gray-700 mb-3">
               Dodaj zakres
             </h3>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Input
                 type="number"
                 placeholder="Początek (min. 16)"
@@ -451,6 +481,7 @@ const Dashboard = () => {
                 value={startAge || ""}
                 onChange={(e) => setStartAge(parseInt(e.target.value))}
                 onKeyPress={handleKeyPress}
+                className="w-full"
               />
               <Input
                 type="number"
@@ -460,16 +491,19 @@ const Dashboard = () => {
                 value={endAge || ""}
                 onChange={(e) => setEndAge(parseInt(e.target.value))}
                 onKeyPress={handleKeyPress}
+                className="w-full"
               />
-              <Button onClick={handleAddRange}>Dodaj zakres</Button>
+              <Button onClick={handleAddRange} className="w-full sm:w-auto">
+                Dodaj zakres
+              </Button>
             </div>
           </div>
         </div>
 
         <UserDataPanel
           userData={userData}
-          onUserDataChange={setUserData}
-          kodPocztowy={kodPocztowy}
+          onUserDataChange={(newUserData) => setUserData(newUserData as any)}
+          kodPocztowy={kodPocztowy || ""}
           onKodPocztowyChange={(kod) => {
             setKodPocztowy(kod);
             setUserData({ kod_pocztowy: kod });
@@ -484,31 +518,35 @@ const Dashboard = () => {
 
         {/* Komunikaty */}
         {resultsData?.komunikaty && resultsData.komunikaty.length > 0 && (
-          <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+          <div className="w-full rounded-2xl p-4 sm:p-6 bg-white shadow-2x mt-6 sm:mt-10">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-secondary rounded-full flex items-center justify-center">
                 <div className="w-2 h-2 bg-secondary-foreground rounded-full"></div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                 Komunikaty
               </h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {resultsData.komunikaty.slice(0, 5).map((komunikat, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-3 py-3 border-b border-gray-200 last:border-b-0"
+                  className="flex items-start gap-3 py-2 sm:py-3 border-b border-gray-200 last:border-b-0"
                 >
                   <div className="w-2 h-2 bg-chart-1 rounded-full mt-2 flex-shrink-0"></div>
-                  <p className="text-gray-700 leading-relaxed">{komunikat}</p>
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                    {komunikat}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         )}
       </div>
-      <div className="w-[40%] h-full overflow-visible">
-        <div className="sticky top-16 w-full h-[640px] overflow-hidden">
+
+      {/* Chat Panel - Mobile: Full width below main content, Desktop: Right side */}
+      <div className="w-full lg:w-[40%] h-auto lg:h-full overflow-visible mt-6 lg:mt-0">
+        <div className="lg:sticky lg:top-16 w-full h-[400px] lg:h-[640px] overflow-hidden">
           <ChatPanel
             messages={messages}
             userData={userData}

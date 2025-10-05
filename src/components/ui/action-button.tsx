@@ -6,7 +6,11 @@ interface ActionButtonProps {
   variant?: "primary" | "secondary" | "outline";
 }
 
-export function ActionButton({ text, onClick, variant = "outline" }: ActionButtonProps) {
+export function ActionButton({
+  text,
+  onClick,
+  variant = "outline",
+}: ActionButtonProps) {
   const getButtonStyles = () => {
     switch (variant) {
       case "primary":
@@ -23,7 +27,7 @@ export function ActionButton({ text, onClick, variant = "outline" }: ActionButto
     <button
       onClick={onClick}
       className={`
-        px-6 py-3 rounded-full font-medium text-sm transition-colors duration-200
+        px-6 py-3 rounded-full cursor-pointer font-medium text-sm transition-colors duration-200
         ${getButtonStyles()}
       `}
     >

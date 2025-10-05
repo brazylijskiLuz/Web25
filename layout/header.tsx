@@ -30,7 +30,7 @@ export const Header = () => {
         >
           Dostępność <Accessibility className="h-5 w-5" />
         </Button>
-        <Button variant={"ghost"} asChild>
+        <Button variant={"outline"} asChild>
           <Link href={isAdminPage ? "/" : "/admin"}>
             {isAdminPage ? "Strona główna" : "Panel administratora"}
           </Link>

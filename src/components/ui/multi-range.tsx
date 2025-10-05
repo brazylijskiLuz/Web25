@@ -90,18 +90,19 @@ export function MultiRange({
     return { primaryRanges, total };
   }, [segments]);
 
+  const trackProps = getTrackProps({
+    style: {
+      position: "relative",
+      width: "100%",
+      height: 8,
+    },
+  });
+  // Extract key from trackProps to avoid spreading it
+  const { key, ...restTrackProps } = trackProps;
+
   return (
     <div className={`w-full ${className}`}>
-      <div
-        {...getTrackProps({
-          style: {
-            position: "relative",
-            width: "100%",
-            height: 8,
-          },
-        })}
-        className="relative w-full rounded-full"
-      >
+      <div {...restTrackProps} className="relative w-full rounded-full">
         {/* ticks */}
         {manualTicks
           ? manualTicks.map((t, i) => (
@@ -122,7 +123,7 @@ export function MultiRange({
                   style={{ transform: "translate(-50%, 32px)" }}
                   className="text-xs text-gray-500 whitespace-nowrap"
                 >
-                  {t.value}
+                  {t.value >= 0 ? t.value : 0}
                 </div>
               </div>
             ))
@@ -144,30 +145,36 @@ export function MultiRange({
                     style={{ transform: "translate(-50%, 32px)" }}
                     className="text-xs text-gray-500 whitespace-nowrap"
                   >
-                    {value}
+                    {value >= 0 ? value : 0}
                   </div>
                 </div>
               );
             })}
 
         {/* segments */}
-        {segments.map(({ getSegmentProps }, i) => (
-          <div
-            key={i}
-            {...getSegmentProps({
-              style: { position: "absolute", height: "100%" },
-            })}
-            className={`rounded-full ${
-              i === 0
-                ? "bg-secondary"
-                : i === segments.length - 1
-                ? "bg-[#C1D9F6]"
-                : i % 2 === 0
-                ? "bg-secondary"
-                : "bg-primary"
-            }`}
-          />
-        ))}
+        {segments.map(({ getSegmentProps }, i) => {
+          const segmentProps = getSegmentProps({
+            style: { position: "absolute", height: "100%" },
+          });
+          // Extract key from segmentProps to avoid spreading it
+          const { key, ...restSegmentProps } = segmentProps;
+
+          return (
+            <div
+              key={i}
+              {...restSegmentProps}
+              className={`rounded-full ${
+                i === 0
+                  ? "bg-secondary"
+                  : i === segments.length - 1
+                  ? "bg-[#C1D9F6]"
+                  : i % 2 === 0
+                  ? "bg-secondary"
+                  : "bg-primary"
+              }`}
+            />
+          );
+        })}
 
         {/* handles */}
         {handles.map(({ value, active, getHandleProps }, idx) => {
@@ -183,13 +190,13 @@ export function MultiRange({
           return (
             <button key={key} {...handleProps} className="focus:outline-none">
               <div
-                className={`bg-primary flex items-center justify-center w-8 h-8 rounded-full text-xs text-white shadow-lg transform transition-all ${
+                className={`bg-primary cursor-pointer flex items-center justify-center w-8 h-8 rounded-full text-xs text-white shadow-lg transform transition-all ${
                   active
                     ? "translate-y-[-100%] scale-110"
                     : "translate-y-0 scale-90"
                 }`}
               >
-                {value}
+                {value >= 0 ? value : 0}
               </div>
             </button>
           );
