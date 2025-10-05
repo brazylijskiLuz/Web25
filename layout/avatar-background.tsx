@@ -289,19 +289,6 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
   const { avatarSize, setAvatarSize, ...avatarRest } = useAvatar();
   const { hidden } = useAvatarGraphics();
 
-  useEffect(() => {
-    const updateSize = () => {
-      const h = window.innerHeight;
-      const newSize = h < 600 ? "small" : h < 900 ? "medium" : "large";
-      if (newSize !== avatarSize) {
-        setAvatarSize(newSize as any);
-      }
-    };
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, [avatarSize, setAvatarSize]);
-
   return (
     <div>
       <div
