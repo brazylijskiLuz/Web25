@@ -5,6 +5,7 @@ import { Title } from "@/components/onboarding/title";
 import { StaticChat } from "@/components/onboarding/static-chat";
 import useAvatar from "@/stores/useAvatar";
 import { useRouter } from "next/navigation";
+import useResultsData from "@/stores/useResultsData";
 
 export default function Home() {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
@@ -12,6 +13,7 @@ export default function Home() {
   const [isHidden, setIsHidden] = useState(false);
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
+  const { setResultsData } = useResultsData();
 
   useEffect(() => {
     setAvatarPosition("middle");
@@ -31,6 +33,8 @@ export default function Home() {
   };
 
   const handleResultsReceived = (data: any) => {
+    // Zapisz dane do kontekstu
+    setResultsData(data);
     // Przekieruj na stronę results
     router.push("/results");
   };
