@@ -10,6 +10,7 @@ interface UserData {
   subkonto_zus: number;
   rok_rozpoczecia_pracy: number;
   rok_przejscia_na_emeryture: number;
+  kod_pocztowy: string;
 }
 
 interface UserDataStore {
@@ -27,6 +28,7 @@ const initialUserData: UserData = {
   subkonto_zus: 0,
   rok_rozpoczecia_pracy: 0,
   rok_przejscia_na_emeryture: 0,
+  kod_pocztowy: "",
 };
 
 const useUserData = create<UserDataStore>()(

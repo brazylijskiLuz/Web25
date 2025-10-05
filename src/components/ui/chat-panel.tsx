@@ -16,9 +16,10 @@ interface ChatPanelProps {
   messages: Message[];
   onSendMessage?: (message: string) => void;
   userData?: any;
+  resultsData?: any;
 }
 
-export function ChatPanel({ messages, onSendMessage, userData }: ChatPanelProps) {
+export function ChatPanel({ messages, onSendMessage, userData, resultsData }: ChatPanelProps) {
   const [inputValue, setInputValue] = useState("");
   const [internalMessages, setInternalMessages] = useState<Message[]>(messages);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,6 +80,7 @@ export function ChatPanel({ messages, onSendMessage, userData }: ChatPanelProps)
 
       console.log("📦 API messages:", apiMessages);
       console.log("📊 User data:", userData);
+      console.log("📊 Results data:", resultsData);
 
       const response = await fetch('/api/dashboard-chat', {
         method: 'POST',
@@ -87,7 +89,8 @@ export function ChatPanel({ messages, onSendMessage, userData }: ChatPanelProps)
         },
         body: JSON.stringify({
           messages: apiMessages,
-          userData: userData
+          userData: userData,
+          resultsData: resultsData
         }),
       });
 
