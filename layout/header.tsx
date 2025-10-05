@@ -15,7 +15,7 @@ export const Header = () => {
     <header className="flex justify-between py-6">
       <Link
         href="/"
-        className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+        className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity no-border"
       >
         Symulator <span className="text-primary">Emerytalny</span>
       </Link>
@@ -29,7 +29,7 @@ export const Header = () => {
         >
           Dostępność <Accessibility className="h-5 w-5" />
         </Button>
-        <Button variant={"outline"} asChild>
+        <Button variant={"ghost"} asChild>
           <Link href={isAdminPage ? "/" : "/admin"}>
             {isAdminPage ? "Strona główna" : "Panel administratora"}
           </Link>
