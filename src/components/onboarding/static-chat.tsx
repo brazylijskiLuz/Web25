@@ -585,36 +585,85 @@ export const StaticChat = ({
     return () => clearInterval(timer);
   }, [showSpinner]);
 
-  // Clear validation error when input becomes valid again
+  // Real-time validation while typing
   useEffect(() => {
-    if (!validationError) return;
+    if (!userInput.trim()) {
+      setValidationError(null);
+      return;
+    }
+
     const lastBot = lastMessage;
+    console.log("Validation check:", {
+      title: lastBot?.title,
+      inputType: lastBot?.inputType,
+      hasValidation: !!lastBot?.validation,
+      userInput,
+      validation: lastBot?.validation,
+    });
+
     if (lastBot?.inputType === "number" && lastBot.validation) {
       const val = Number(userInput);
-      if (!Number.isNaN(val)) {
-        // Special handling for year validation
-        if (lastBot.title?.includes("Rok")) {
-          // Check all year validation conditions
-          const isValidLength = userInput.length <= 4;
-          const isWholeNumber = Number.isInteger(val);
-          const { min, max } = lastBot.validation;
-          const isInRange =
-            (min == null || val >= min) && (max == null || val <= max);
 
-          if (isValidLength && isWholeNumber && isInRange) {
-            setValidationError(null);
-          }
-        } else {
-          // Regular numeric validation
-          const { min, max } = lastBot.validation;
-          if ((min == null || val >= min) && (max == null || val <= max)) {
-            setValidationError(null);
-          }
+      // First check if it's a valid number (for all numeric inputs)
+      if (Number.isNaN(val)) {
+        setValidationError("Wprowadź prawidłową liczbę");
+        return;
+      }
+
+      // Special handling for year validation
+      if (lastBot.title?.includes("Rok") || lastBot.content?.includes("roku")) {
+        // Check if year has more than 4 digits
+        if (userInput.length > 4) {
+          setValidationError("Rok może mieć maksymalnie 4 cyfry");
+          return;
+        }
+
+        // Check if year is a whole number (no decimals)
+        if (!Number.isNaN(val) && !Number.isInteger(val)) {
+          setValidationError("Rok musi być liczbą całkowitą");
+          return;
+        }
+
+        const { min, max } = lastBot.validation;
+        if (
+          !Number.isNaN(val) &&
+          ((min != null && val < min) || (max != null && val > max))
+        ) {
+          setValidationError(
+            `Podaj rok z przedziału ${min ?? "1950"}–${max ?? CURRENT_YEAR}`
+          );
+          return;
+        }
+      } else {
+        // Regular numeric validation for non-year inputs
+        const { min, max } = lastBot.validation;
+        console.log("Regular validation:", {
+          title: lastBot.title,
+          val,
+          min,
+          max,
+          isMinValid: min == null || val >= min,
+          isMaxValid: max == null || val <= max,
+          shouldShowError:
+            (min != null && val < min) || (max != null && val > max),
+        });
+        if ((min != null && val < min) || (max != null && val > max)) {
+          const errorMessage = `Podaj wartość z przedziału ${min ?? "-∞"}–${
+            max ?? "+∞"
+          }`;
+          console.log("Setting validation error:", errorMessage);
+          setValidationError(errorMessage);
+          return;
         }
       }
+
+      // Clear error if all validations pass
+      setValidationError(null);
     } else if (userInput.trim()) {
       setValidationError(null);
     }
+
+    console.log("Current validation error state:", validationError);
   }, [userInput, lastMessage, validationError]);
 
   // Once data forwarding completes, fill progress bar quickly
