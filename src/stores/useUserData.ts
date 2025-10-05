@@ -8,6 +8,8 @@ interface UserData {
   current_salary: number;
   konto_zus: number;
   subkonto_zus: number;
+  rok_rozpoczecia_pracy: number;
+  rok_przejscia_na_emeryture: number;
 }
 
 interface UserDataStore {
@@ -23,6 +25,8 @@ const initialUserData: UserData = {
   current_salary: 0,
   konto_zus: 0,
   subkonto_zus: 0,
+  rok_rozpoczecia_pracy: 0,
+  rok_przejscia_na_emeryture: 0,
 };
 
 const useUserData = create<UserDataStore>()(

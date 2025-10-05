@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import useAvatar from "@/stores/useAvatar";
 import useUserData from "@/stores/useUserData";
+import useResultsData from "@/stores/useResultsData";
+import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
 import { SelectionField } from "@/components/ui/selection-field";
 import { ChatPanel } from "@/components/ui/chat-panel";
@@ -95,9 +97,22 @@ const DATA = {
 const Dashboard = () => {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
   const { userData, setUserData } = useUserData();
+  const { setResultsData, resultsData } = useResultsData();
+  const router = useRouter();
   console.log("tusoo", userData);
   const [numberOfChildren, setNumberOfChildren] = useState(3);
-  const [values, setValues] = useState<number[]>([25, 65]);
+  const rokStartuPracy = userData.rok_rozpoczecia_pracy || 0;
+  console.log("---------------");
+  console.log("rokStartuPracy", rokStartuPracy);
+  // const rokPrzejsciaNaEmeryture = resultsData?.rok_przejscia_na_emeryture || 0;
+  const wiekPrzejsciaNaEmeryture =
+    resultsData?.wiek_przejscia_na_emeryture || 0;
+
+  const rokUrodzenia = 2025 - userData.age;
+  const [start, setStart] = useState(rokStartuPracy - rokUrodzenia);
+  const [end, setEnd] = useState(userData.gender === "male" ? 65 : 60);
+
+  const [values, setValues] = useState<number[]>([start, end]);
   const [startAge, setStartAge] = useState<number | null>();
   const [endAge, setEndAge] = useState<number | null>();
   const [validationError, setValidationError] = useState<string>("");
@@ -117,8 +132,8 @@ const Dashboard = () => {
         consideredSickLeave: true,
         accountBalance: userData.konto_zus,
         subAccountBalance: userData.subkonto_zus,
-        pension: DATA.emerytura_nominalna_miesieczna_brutto,
-        realPension: DATA.emerytura_urealniona_miesieczna_brutto,
+        pension: resultsData?.emerytura_nominalna_miesieczna_brutto || 0,
+        realPension: resultsData?.emerytura_urealniona_miesieczna_brutto || 0,
         postalCode: kodPocztowy,
       };
 
@@ -184,8 +199,14 @@ const Dashboard = () => {
     setAvatarPosition("right");
     setAvatarSize("small");
     setAvatarAssistant("pointing-up");
+
+    // Set initial data from constant if no data exists
+    if (!resultsData) {
+      setResultsData(DATA);
+    }
+
     sendReportToAPI();
-  }, []);
+  }, [resultsData, setResultsData]);
 
   return (
     <div className="flex w-full h-screen overflow-hidden mt-14">
@@ -201,8 +222,10 @@ const Dashboard = () => {
           )}
         </div>
         <RetirementQuota
-          expectedAmount={7829}
-          calculatedAmount={4829}
+          expectedAmount={userData.desired_pension_amount}
+          calculatedAmount={
+            resultsData?.emerytura_urealniona_miesieczna_brutto || 0
+          }
           onAddToChat={handleAddToChat}
         />
         <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
@@ -217,7 +240,7 @@ const Dashboard = () => {
           />
           <div className="mt-6">
             <h3 className="text-sm font-medium text-gray-700 mb-3">
-              Dodaj nowy zakres pracy
+              Dodaj zakres
             </h3>
             <div className="flex gap-4">
               <Input
@@ -273,7 +296,7 @@ const Dashboard = () => {
       </div>
       <div className="w-[40%] h-full overflow-visible">
         <div className="sticky top-16 w-full h-[640px] overflow-hidden">
-          <ChatPanel messages={messages} userData={DATA} />
+          <ChatPanel messages={messages} userData={resultsData || {}} />
         </div>
       </div>
     </div>
