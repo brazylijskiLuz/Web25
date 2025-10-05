@@ -283,12 +283,43 @@ export const StaticChat = ({
         setValidationError("Wprowadź prawidłową liczbę");
         return;
       }
-      const { min, max } = lastBot.validation;
-      if ((min != null && valueNum < min) || (max != null && valueNum > max)) {
-        setValidationError(
-          `Podaj wartość z przedziału ${min ?? "-∞"}–${max ?? "+∞"}`
-        );
-        return;
+
+      // Special handling for year validation
+      if (lastBot.title?.includes("Rok")) {
+        // Check if year has more than 4 digits
+        if (content.length > 4) {
+          setValidationError("Rok może mieć maksymalnie 4 cyfry");
+          return;
+        }
+
+        // Check if year is a whole number (no decimals)
+        if (!Number.isInteger(valueNum)) {
+          setValidationError("Rok musi być liczbą całkowitą");
+          return;
+        }
+
+        const { min, max } = lastBot.validation;
+        if (
+          (min != null && valueNum < min) ||
+          (max != null && valueNum > max)
+        ) {
+          setValidationError(
+            `Podaj rok z przedziału ${min ?? "1950"}–${max ?? CURRENT_YEAR}`
+          );
+          return;
+        }
+      } else {
+        // Regular numeric validation for non-year inputs
+        const { min, max } = lastBot.validation;
+        if (
+          (min != null && valueNum < min) ||
+          (max != null && valueNum > max)
+        ) {
+          setValidationError(
+            `Podaj wartość z przedziału ${min ?? "-∞"}–${max ?? "+∞"}`
+          );
+          return;
+        }
       }
     }
     // clear previous error
@@ -561,9 +592,24 @@ export const StaticChat = ({
     if (lastBot?.inputType === "number" && lastBot.validation) {
       const val = Number(userInput);
       if (!Number.isNaN(val)) {
-        const { min, max } = lastBot.validation;
-        if ((min == null || val >= min) && (max == null || val <= max)) {
-          setValidationError(null);
+        // Special handling for year validation
+        if (lastBot.title?.includes("Rok")) {
+          // Check all year validation conditions
+          const isValidLength = userInput.length <= 4;
+          const isWholeNumber = Number.isInteger(val);
+          const { min, max } = lastBot.validation;
+          const isInRange =
+            (min == null || val >= min) && (max == null || val <= max);
+
+          if (isValidLength && isWholeNumber && isInRange) {
+            setValidationError(null);
+          }
+        } else {
+          // Regular numeric validation
+          const { min, max } = lastBot.validation;
+          if ((min == null || val >= min) && (max == null || val <= max)) {
+            setValidationError(null);
+          }
         }
       }
     } else if (userInput.trim()) {
@@ -730,11 +776,59 @@ A jak wygląda Twoja emerytura w porównaniu z innymi? Sprawdź!`}
                 <Input
                   type={lastMessage?.inputType ?? "text"}
                   value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Limit year input to 4 digits
+                    if (
+                      lastMessage?.title?.includes("Rok") &&
+                      value.length > 4
+                    ) {
+                      return;
+                    }
+                    setUserInput(value);
+                  }}
                   onKeyPress={handleKeyPress}
-                  placeholder="Napisz wiadomość..."
+                  placeholder={(() => {
+                    if (!lastMessage) return "Napisz odpowiedź...";
+
+                    const title = lastMessage.title?.toLowerCase() || "";
+                    const content = lastMessage.content?.toLowerCase() || "";
+
+                    // Check for specific question types
+                    if (title.includes("rok") || content.includes("roku")) {
+                      return "np. 2020";
+                    }
+                    if (title.includes("wiek") || content.includes("wiek")) {
+                      return "np. 30";
+                    }
+                    if (
+                      title.includes("wysokości") ||
+                      content.includes("wysokości") ||
+                      content.includes("emeryturę")
+                    ) {
+                      return "Wprowadź oczekiwaną kwotę";
+                    }
+                    if (
+                      title.includes("wynagrodzenie") ||
+                      content.includes("wynagrodzenie")
+                    ) {
+                      return "Wprowadź wynagrodzenie brutto...";
+                    }
+                    if (lastMessage.inputType === "number") {
+                      return "Wprowadź liczbę...";
+                    }
+                    return "Napisz odpowiedź...";
+                  })()}
                   className="w-64"
+                  style={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
                   aria-invalid={Boolean(validationError)}
+                  maxLength={
+                    lastMessage?.title?.includes("Rok") ? 4 : undefined
+                  }
                   // Pass validation attributes if present
                   min={lastMessage?.validation?.min}
                   max={lastMessage?.validation?.max}
