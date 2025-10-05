@@ -213,3 +213,17 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+.\[\&_\.recharts-rectangle\.recharts-tooltip-cursor\]\:fill-muted
+  .recharts-rectangle.recharts-tooltip-cursor {
+  /* fill: #fff !important; */
+}
+
+/* Dynamic tooltip background based on whether hovered bar is goal */
+[data-hover-goal="true"] .recharts-rectangle.recharts-tooltip-cursor {
+  fill: #dbf0e4 !important; /* greenish */
+}
+
+[data-hover-goal="false"] .recharts-rectangle.recharts-tooltip-cursor,
+:not([data-hover-goal]) .recharts-rectangle.recharts-tooltip-cursor {
+  fill: #e3edf9 !important; /* default blueish */
+}

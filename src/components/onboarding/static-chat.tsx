@@ -1,8 +1,20 @@
 import { cn } from "@/lib/utils";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Message } from "./message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "../ui/progress";
+import { getRandomFact } from "@/lib/facts";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+} from "../ui/chart";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+
+// Helper constant
+const CURRENT_YEAR = new Date().getFullYear();
 
 interface MessageData {
   id: string;
@@ -11,6 +23,13 @@ interface MessageData {
   content: string;
   options?: { label: string; value: string }[];
   inputType?: "text" | "number";
+
+  // NEW: basic validation attributes for numeric inputs
+  validation?: {
+    min?: number;
+    max?: number;
+    step?: number;
+  };
 }
 
 interface StaticChatProps {
@@ -25,6 +44,7 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     content:
       "Cześć! Jakiej wysokości emeryturę chciałbyś/chciałabyś otrzymywać?",
     inputType: "number",
+    validation: { min: 1000, max: 70000, step: 100 },
   },
   {
     type: "bot",
@@ -32,6 +52,7 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     // Zmieniono content aby różnił się od title
     content: "Podaj, proszę, swój wiek.",
     inputType: "number",
+    validation: { min: 10, max: 100, step: 1 },
   },
   {
     type: "bot",
@@ -49,12 +70,14 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     title: "Aktualne wynagrodzenie brutto",
     content: "Ile wynosi Twoje aktualne miesięczne wynagrodzenie brutto?",
     inputType: "number",
+    validation: { min: 3000, max: 100000, step: 1 },
   },
   {
     type: "bot",
     title: "Rok rozpoczęcia pracy",
     content: "W którym roku rozpocząłeś/rozpoczęłaś pracę?",
     inputType: "number",
+    validation: { min: 1950, max: CURRENT_YEAR, step: 1 },
   },
   // {
   //   type: "bot",
@@ -168,6 +191,8 @@ export const StaticChat = ({
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [userInput, setUserInput] = useState("");
   const [botPending, setBotPending] = useState(false);
+  // NEW: validation error state
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [chatFinished, setChatFinished] = useState(false); // indicates that all questions are answered
   const [pendingResults, setPendingResults] = useState<any>(null); // stores API results until user proceeds
   const [proceedClicked, setProceedClicked] = useState(false); // user clicked "Dalej" after chat finished
@@ -175,6 +200,7 @@ export const StaticChat = ({
   const loadingStartRef = useRef<number | null>(null);
   const [desiredPension, setDesiredPension] = useState<number | null>(null);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [hoverBar, setHoverBar] = useState<number | null>(null);
   const [additionalQueue, setAdditionalQueue] = useState<
     Omit<MessageData, "id">[]
   >([]);
@@ -202,6 +228,7 @@ export const StaticChat = ({
         content: firstMessage.content,
         inputType: firstMessage.inputType,
         options: firstMessage.options,
+        validation: firstMessage.validation,
       };
       setMessages([initialMessage]);
       setCurrentMessageIndex(1);
@@ -248,6 +275,25 @@ export const StaticChat = ({
   const handleSendMessage = async (label?: string) => {
     const content = (label ?? userInput).toString().trim();
     if (!content) return;
+
+    // Perform validation for numeric inputs if rules present
+    const lastBot = messages[messages.length - 1] as MessageData | undefined;
+    if (!label && lastBot?.inputType === "number" && lastBot.validation) {
+      const valueNum = Number(content);
+      if (Number.isNaN(valueNum)) {
+        setValidationError("Wprowadź prawidłową liczbę");
+        return;
+      }
+      const { min, max } = lastBot.validation;
+      if ((min != null && valueNum < min) || (max != null && valueNum > max)) {
+        setValidationError(
+          `Podaj wartość z przedziału ${min ?? "-∞"}–${max ?? "+∞"}`
+        );
+        return;
+      }
+    }
+    // clear previous error
+    setValidationError(null);
 
     // Determine if we need to extend additionalQueue before proceeding
     let newAdditionalQueue = [...additionalQueue];
@@ -451,6 +497,7 @@ export const StaticChat = ({
           content: nextBotMessage.content,
           inputType: nextBotMessage.inputType,
           options: nextBotMessage.options,
+          validation: nextBotMessage.validation,
         };
         setMessages((prev) => [...prev, botResponse]);
         setCurrentMessageIndex((prev) => prev + 1);
@@ -520,8 +567,8 @@ export const StaticChat = ({
   // When loading, replace chat UI with standalone progress screen
   if (showSpinner) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-background/90">
-        <div className="bg-background rounded-md p-6 flex flex-col max-w-80 items-center gap-4 shadow-lg min-w-[260px]">
+      <div className="w-full h-full flex items-center justify-center mt-14">
+        <div className="bg-background rounded-md p-6 flex flex-col max-w-80 items-center gap-4 min-w-[320px]">
           <Progress
             value={progress}
             className="w-64 transition-all duration-700"
@@ -569,12 +616,31 @@ export const StaticChat = ({
           {/* Placeholder view displayed after chat is finished */}
           {chatFinished && (
             <div className="w-full h-72 rounded-md flex items-start justify-center mt-4 py-4 bg-transparent">
-              <Message
-                id={`bot-${Date.now()}`}
-                type="bot"
-                title="Podsumowanie zwolnień"
-                content="Wygląda na to, że przez całe życie będziesz 14 miesięcy na urlopie lekarskim. Sprawdź, w której grupie wysokości emerytur się znajdujesz"
-              />
+              {(() => {
+                // determine gender from user messages
+                const genderMsg = messages.find(
+                  (m) =>
+                    m.type === "user" &&
+                    ["kobieta", "mężczyzna"].includes(m.content.toLowerCase())
+                );
+                const gender = genderMsg?.content.toLowerCase();
+                const sickYears = gender === "kobieta" ? 2.4 : 2.1; // default to male value
+                const sickText = sickYears.toLocaleString("pl-PL", {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                });
+
+                return (
+                  <Message
+                    id={`bot-${Date.now()}`}
+                    type="bot"
+                    title="Podsumowanie zwolnień"
+                    content={`Przez całe życie możesz spędzić nawet ${sickText} lat na zwolnieniu lekarskim.
+A jak wygląda Twoja emerytura w porównaniu z innymi? Sprawdź!`}
+                  />
+                );
+              })()}
+
               {desiredPension ? (
                 (() => {
                   const chartData = [
@@ -586,24 +652,29 @@ export const StaticChat = ({
                     { name: "> śr", value: AVG_PENSION },
                     { name: "wys", value: HIGH_PENSION },
                     { name: "Cel", value: desiredPension },
-                  ];
+                  ].sort((a, b) => a.value - b.value);
+                  const goalIdx = chartData.findIndex((d) => d.name === "Cel");
                   return (
                     <ChartContainer
                       config={{ bar: { color: "#3f84d2", label: "Kwota" } }}
                       className="w-full h-full"
+                      data-hover-goal={hoverBar === goalIdx}
                     >
-                      <BarChart data={chartData}>
+                      <BarChart
+                        data={chartData}
+                        onMouseLeave={() => setHoverBar(null)}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
-                        <YAxis />
+                        {/* Tooltip only, cursor color via CSS */}
                         <ChartTooltip content={<CustomTooltip />} />
                         <ChartLegend content={<ChartLegendContent />} />
-                        <Bar dataKey="value" name="Kwota">
-                          {chartData.map((_, idx) => (
+                        <Bar dataKey="value" name="Kwota" radius={[8, 8, 0, 0]}>
+                          {chartData.map((entry, idx) => (
                             <Cell
                               key={`cell-${idx}`}
                               fill={
-                                idx === chartData.length - 1
+                                entry.name === "Cel"
                                   ? PRIMARY_HEX
                                   : SECONDARY_HEX
                               }
@@ -640,7 +711,7 @@ export const StaticChat = ({
           {!botPending &&
             !hasOptions &&
             (!chatFinished ? (
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex flex-col items-end gap-2 pt-4">
                 <Input
                   type={lastMessage?.inputType ?? "text"}
                   value={userInput}
@@ -648,7 +719,17 @@ export const StaticChat = ({
                   onKeyPress={handleKeyPress}
                   placeholder="Napisz wiadomość..."
                   className="w-64"
+                  aria-invalid={Boolean(validationError)}
+                  // Pass validation attributes if present
+                  min={lastMessage?.validation?.min}
+                  max={lastMessage?.validation?.max}
+                  step={lastMessage?.validation?.step}
                 />
+                {validationError && (
+                  <span className="text-destructive text-xs max-w-64 text-right">
+                    {validationError}
+                  </span>
+                )}
               </div>
             ) : null)}
         </div>
@@ -659,7 +740,12 @@ export const StaticChat = ({
           {!chatFinished ? (
             <Button
               onClick={() => handleSendMessage()}
-              disabled={!userInput.trim() || botPending || hasOptions}
+              disabled={
+                !userInput.trim() ||
+                botPending ||
+                hasOptions ||
+                Boolean(validationError)
+              }
               className="absolute bottom-0 right-0"
             >
               Dalej
