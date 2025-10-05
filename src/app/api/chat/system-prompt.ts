@@ -175,8 +175,8 @@ Składki na koncie waloryzowane są rocznym wskaźnikiem waloryzacji składek ze
 
 Dla składki wpłaconej w roku t, waloryzowanej do roku emerytury T:
 
-skladka_zwaloryzowana_konto[t] = skladka_na_konto[t] * ILOCZYN(wskaznik_waloryzacji_konto[i] / 100)
-gdzie i = od t+1 do T
+skladka_zwaloryzowana_konto[t] = skladka_na_konto[t] * ILOCZYN(wskaznik_waloryzacji_konto[i])
+gdzie i = od t+1 do roku_zakonczenia_pracy
 
 **Przykład**: Składka 10 000 PLN wpłacona w 2020, waloryzowana do 2025:
 wskazniki: 2021: 109,33%, 2022: 114,40%, 2023: 114,87%, 2024: 114,41%, 2025: 107,39%
@@ -184,7 +184,7 @@ wskazniki: 2021: 109,33%, 2022: 114,40%, 2023: 114,87%, 2024: 114,41%, 2025: 107
 
 **Waloryzacja składek na SUBKONCIE:**
 
-skladka_zwaloryzowana_subkonto[t] = skladka_na_subkonto[t] * ILOCZYN(wskaznik_waloryzacji_subkonto[i] / 100)
+skladka_zwaloryzowana_subkonto[t] = skladka_na_subkonto[t] * ILOCZYN(wskaznik_waloryzacji_subkonto[i])
 gdzie i = od t+1 do T
 
 **Przykład**: Składka 5 000 PLN wpłacona w 2020, waloryzowana do 2025:
