@@ -214,6 +214,12 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
+.recharts-rectangle.recharts-tooltip-cursor,
+:not([data-hover-goal]) .recharts-rectangle.recharts-tooltip-cursor {
+  fill: #e3edf9 !important; /* default blueish */
+  opacity: 0.8;
+}
+
 /* ===== ACCESSIBILITY STYLES WCAG 2.0 ===== */
 
 /* Font Size Adjustments */

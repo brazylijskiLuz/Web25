@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "biome check",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@openrouter/ai-sdk-provider": "^1.2.0",
     "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "ai": "^5.0.60",
     "class-variance-authority": "^0.7.1",
