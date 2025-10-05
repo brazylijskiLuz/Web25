@@ -323,8 +323,8 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex justify-center -mt-56 items-center">
+        <div className="text-center bg-white shadow-lg rounded-md p-12 ">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Ładowanie danych...</p>
         </div>
