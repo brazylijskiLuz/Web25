@@ -30,6 +30,7 @@ export function ChatPanel({
   const [isLoading, setIsLoading] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
+  const lastProcessedMessagesLength = useRef(0);
 
   const scrollToBottom = () => {
     const container = messagesContainerRef.current;
@@ -158,21 +159,29 @@ export function ChatPanel({
     [userData, resultsData]
   );
 
+  const handleApiCallRef = useRef(handleApiCall);
+
+  // Update the ref whenever handleApiCall changes
+  useEffect(() => {
+    handleApiCallRef.current = handleApiCall;
+  }, [handleApiCall]);
+
   // Handle new messages from external source (like button clicks)
   useEffect(() => {
-    if (messages.length > internalMessages.length) {
-      const newMessages = messages.slice(internalMessages.length);
+    if (messages.length > lastProcessedMessagesLength.current) {
+      const newMessages = messages.slice(lastProcessedMessagesLength.current);
       const updatedMessages = [...internalMessages, ...newMessages];
       setInternalMessages(updatedMessages);
+      lastProcessedMessagesLength.current = messages.length;
 
       // Check if the last new message is from user - if so, trigger API call
       const lastNewMessage = newMessages[newMessages.length - 1];
       if (lastNewMessage?.isUser && !isLoading) {
         // Trigger AI response for the new user message
-        handleApiCall(updatedMessages);
+        handleApiCallRef.current(updatedMessages);
       }
     }
-  }, [messages, internalMessages, isLoading, handleApiCall]);
+  }, [messages, internalMessages, isLoading]);
 
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -193,7 +202,7 @@ export function ChatPanel({
     setInputValue("");
 
     // Call API with the updated messages
-    await handleApiCall(updatedMessages);
+    await handleApiCallRef.current(updatedMessages);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

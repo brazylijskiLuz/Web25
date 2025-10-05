@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useAvatar from "@/stores/useAvatar";
 import useUserData from "@/stores/useUserData";
 
@@ -185,7 +185,14 @@ const Dashboard = () => {
   const [isRegenerating, setIsRegenerating] = useState(false);
 
   // TODO: Replace with API call
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<
+    Array<{
+      id: string;
+      title: string;
+      description?: string;
+      isUser?: boolean;
+    }>
+  >([]);
 
   const sendReportToAPI = async () => {
     try {
@@ -356,16 +363,15 @@ const Dashboard = () => {
     }
   };
 
-  const handleAddToChat = (message: string) => {
+  const handleAddToChat = useCallback((message: string) => {
     const newMessage = {
       id: Date.now().toString(),
       title: message,
       description: "",
       isUser: true,
     };
-    //@ts-ignore
     setMessages((prev) => [...prev, newMessage]);
-  };
+  }, []);
 
   const handleAddRange = () => {
     if (startAge && endAge && startAge >= 16 && startAge < endAge) {
