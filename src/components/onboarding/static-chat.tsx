@@ -200,6 +200,7 @@ export const StaticChat = ({
   const [proceedClicked, setProceedClicked] = useState(false); // user clicked "Dalej" after chat finished
   const hasForwarded = useRef(false);
   const loadingStartRef = useRef<number | null>(null);
+  const validationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [desiredPension, setDesiredPension] = useState<number | null>(null);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [additionalQueue, setAdditionalQueue] = useState<
@@ -632,86 +633,58 @@ export const StaticChat = ({
     return () => clearInterval(timer);
   }, [showSpinner]);
 
-  // Real-time validation while typing
+  // Real-time validation with delayed error display (1s). Clear instantly when valid.
   useEffect(() => {
-    if (!userInput.trim()) {
-      setValidationError(null);
-      return;
-    }
+    if (validationTimerRef.current) clearTimeout(validationTimerRef.current);
 
     const lastBot = lastMessage;
-    console.log("Validation check:", {
-      title: lastBot?.title,
-      inputType: lastBot?.inputType,
-      hasValidation: !!lastBot?.validation,
-      userInput,
-      validation: lastBot?.validation,
-    });
 
-    if (lastBot?.inputType === "number" && lastBot.validation) {
-      const val = Number(userInput);
+    const computeError = (): string | null => {
+      if (!userInput.trim()) return null;
 
-      // First check if it's a valid number (for all numeric inputs)
-      if (Number.isNaN(val)) {
-        setValidationError("Wprowadź prawidłową liczbę");
-        return;
-      }
+      if (lastBot?.inputType === "number" && lastBot.validation) {
+        const val = Number(userInput);
+        if (Number.isNaN(val)) return "Wprowadź prawidłową liczbę";
 
-      // Special handling for year validation
-      if (lastBot.title?.includes("Rok") || lastBot.content?.includes("roku")) {
-        // Check if year has more than 4 digits
-        if (userInput.length > 4) {
-          setValidationError("Rok może mieć maksymalnie 4 cyfry");
-          return;
-        }
-
-        // Check if year is a whole number (no decimals)
-        if (!Number.isNaN(val) && !Number.isInteger(val)) {
-          setValidationError("Rok musi być liczbą całkowitą");
-          return;
-        }
-
-        const { min, max } = lastBot.validation;
         if (
-          !Number.isNaN(val) &&
-          ((min != null && val < min) || (max != null && val > max))
+          lastBot.title?.includes("Rok") ||
+          lastBot.content?.includes("roku")
         ) {
-          setValidationError(
-            `Podaj rok z przedziału ${min ?? "1950"}–${max ?? CURRENT_YEAR}`
-          );
-          return;
+          if (userInput.length > 4) return "Rok może mieć maksymalnie 4 cyfry";
+          if (!Number.isInteger(val)) return "Rok musi być liczbą całkowitą";
+          const { min, max } = lastBot.validation;
+          if ((min != null && val < min) || (max != null && val > max)) {
+            return `Podaj rok z przedziału ${min ?? "1950"}–${
+              max ?? CURRENT_YEAR
+            }`;
+          }
+        } else {
+          const { min, max } = lastBot.validation;
+          if ((min != null && val < min) || (max != null && val > max)) {
+            return `Podaj wartość z przedziału ${min ?? "-∞"}–${max ?? "+∞"}`;
+          }
         }
-      } else {
-        // Regular numeric validation for non-year inputs
-        const { min, max } = lastBot.validation;
-        console.log("Regular validation:", {
-          title: lastBot.title,
-          val,
-          min,
-          max,
-          isMinValid: min == null || val >= min,
-          isMaxValid: max == null || val <= max,
-          shouldShowError:
-            (min != null && val < min) || (max != null && val > max),
-        });
-        if ((min != null && val < min) || (max != null && val > max)) {
-          const errorMessage = `Podaj wartość z przedziału ${min ?? "-∞"}–${
-            max ?? "+∞"
-          }`;
-          console.log("Setting validation error:", errorMessage);
-          setValidationError(errorMessage);
-          return;
-        }
+        return null; // passes numeric checks
       }
+      return null; // non-numeric inputs currently not validated
+    };
 
-      // Clear error if all validations pass
-      setValidationError(null);
-    } else if (userInput.trim()) {
-      setValidationError(null);
+    const err = computeError();
+
+    if (!err) {
+      setValidationError(null); // clear immediately when valid
+    } else {
+      // show after 1s of no further typing
+      validationTimerRef.current = setTimeout(
+        () => setValidationError(err),
+        1000
+      );
     }
 
-    console.log("Current validation error state:", validationError);
-  }, [userInput, lastMessage, validationError]);
+    return () => {
+      if (validationTimerRef.current) clearTimeout(validationTimerRef.current);
+    };
+  }, [userInput, lastMessage]);
 
   // Once data forwarding completes, fill progress bar quickly
   useEffect(() => {
@@ -911,7 +884,7 @@ export const StaticChat = ({
           {!botPending &&
             !hasOptions &&
             (!chatFinished ? (
-              <div className="flex flex-col items-end gap-2 pt-4">
+              <div className="flex flex-col items-end gap-2 pt-4 pb-6">
                 <Input
                   type={lastMessage?.inputType ?? "text"}
                   value={userInput}
@@ -951,7 +924,7 @@ export const StaticChat = ({
                       title.includes("wynagrodzenie") ||
                       content.includes("wynagrodzenie")
                     ) {
-                      return "Wprowadź wynagrodzenie brutto...";
+                      return "Wprowadź wynagrodzenie...";
                     }
                     if (lastMessage.inputType === "number") {
                       return "Wprowadź liczbę...";
@@ -983,7 +956,7 @@ export const StaticChat = ({
         </div>
 
         {/* Input Area */}
-        <div className="flex justify-end gap-2 pt-4" id="chat-input-container">
+        <div className="flex justify-end gap-2 mt-4" id="chat-input-container">
           {/* Floating Next Button */}
           {!chatFinished ? (
             <Button
