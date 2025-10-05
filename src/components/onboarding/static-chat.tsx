@@ -585,6 +585,9 @@ export const StaticChat = ({
     return (
       <div className="w-full h-full flex items-center justify-center mt-14">
         <div className="bg-background rounded-md p-6 flex flex-col max-w-80 items-center gap-4 min-w-[320px]">
+          <p className="text-xl font-bold mb-4">
+            Obliczamy twoją <span className="text-primary">emeryturę</span>
+          </p>
           <Progress
             value={progress}
             className="w-64 transition-all duration-700"
@@ -706,7 +709,7 @@ A jak wygląda Twoja emerytura w porównaniu z innymi? Sprawdź!`}
           )}
           {/* Option buttons */}
           {hasOptions && (
-            <div className="flex gap-2 flex-wrap pt-2 justify-end">
+            <div className="flex gap-0.5 flex-wrap pt-2 justify-end">
               {lastMessage!.options!.map((opt) => (
                 <Button
                   key={opt.value}
