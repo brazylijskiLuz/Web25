@@ -39,14 +39,17 @@ export function ChatMessage({
             alt="Avatar"
             width={48}
             height={48}
-            className="object-cover"
+            className="object-cover w-12 h-12"
+            priority
           />
         </div>
       </div>
 
       {/* Message Content */}
       <div className="flex-1">
-        <div className="text-[16px] text-gray-900 leading-relaxed whitespace-pre-wrap">{title}</div>
+        <div className="text-[16px] text-gray-900 leading-relaxed whitespace-pre-wrap">
+          {title}
+        </div>
         {description && (
           <p className="text-[16px] text-gray-700 leading-relaxed mt-2">
             {description}
