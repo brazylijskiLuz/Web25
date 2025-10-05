@@ -135,6 +135,8 @@ const Dashboard = () => {
         pension: resultsData?.emerytura_nominalna_miesieczna_brutto || 0,
         realPension: resultsData?.emerytura_urealniona_miesieczna_brutto || 0,
         postalCode: kodPocztowy,
+        age: userData.age,
+        data: resultsData?.scenariusze_dluzszej_pracy,
       };
 
       const response = await fetch("/api/report/create", {
@@ -152,8 +154,8 @@ const Dashboard = () => {
       const result = await response.json();
       console.log("Report created successfully:", result);
 
-      if (result && result.value) {
-        let url = result.value;
+      if (result && result.value.pdfFile) {
+        let url = result.value.pdfFile;
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
           url = "https://" + url;
         }
