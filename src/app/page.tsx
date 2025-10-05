@@ -36,7 +36,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col items-center align-middle w-full">
       <Title
         isHidden={isHidden}
         animationFinished={animationFinished}
