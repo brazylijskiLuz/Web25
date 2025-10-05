@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { MultiRange } from "@/components/ui/multi-range";
 import RangesPanel from "@/components/ui/ranges-list";
 import { UserDataPanel } from "@/components/ui/user-data-panel";
+import { ChildrenPanel } from "@/components/ui/children-panel";
 import { useFormatted } from "@/stores/useFormatted";
 
 const DATA = {
@@ -473,6 +474,12 @@ const Dashboard = () => {
             setKodPocztowy(kod);
             setUserData({ kod_pocztowy: kod });
           }}
+        />
+
+        <ChildrenPanel
+          numberOfChildren={numberOfChildren}
+          onNumberOfChildrenChange={setNumberOfChildren}
+          onAddToChat={handleAddToChat}
         />
 
         {/* Komunikaty */}
