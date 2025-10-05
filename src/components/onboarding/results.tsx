@@ -1,4 +1,6 @@
+import useAvatar from "@/stores/useAvatar";
 import { AlertCircle } from "lucide-react";
+import { useEffect } from "react";
 
 interface ScenariuszDluzszejPracy {
   dodatkowe_lata: number;
@@ -62,6 +64,13 @@ const formatDecimal = (value: number, decimals = 1): string => {
 };
 
 export const Results = ({ data }: ResultsProps) => {
+  const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
+  useEffect(() => {
+    setAvatarPosition("right");
+    setAvatarAssistant("pointing-left");
+    setAvatarSize("large");
+  }, []);
+
   return (
     <div className="mt-20 flex w-full  mx-auto px-4">
       <div className="w-full">

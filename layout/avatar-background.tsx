@@ -55,7 +55,7 @@ const circlePositionVariants = cva(
       {
         position: "right",
         size: "large",
-        class: "h-[126vh] bottom-[-72vh]",
+        class: "h-[126vh] bottom-[-72vh] -right-[45vw]",
       },
       {
         position: "left",
@@ -225,7 +225,7 @@ const assistantVariants = cva(
       {
         position: "right",
         size: "large",
-        class: "h-[126vh] bottom-[-58.5vh]",
+        class: "h-[126vh] bottom-[-58.5vh] -right-[35vw]",
       },
       {
         position: "left",
