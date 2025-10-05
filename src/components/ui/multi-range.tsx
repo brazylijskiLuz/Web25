@@ -127,11 +127,11 @@ export function MultiRange({
               </div>
             ))
           : ticks.map(({ value, getTickProps }, i) => {
-              const tickProps = getTickProps({
+              const { key, ...tickProps } = getTickProps({
                 style: { position: "absolute" },
               });
               return (
-                <div key={i} {...tickProps} className="absolute">
+                <div key={key} {...tickProps} className="absolute">
                   <div
                     className="bg-gray-400"
                     style={{
@@ -151,50 +151,52 @@ export function MultiRange({
             })}
 
         {/* segments */}
-        {segments.map(({ getSegmentProps }, i) => (
-          <div
-            key={i}
-            {...getSegmentProps({
-              style: { position: "absolute", height: "100%" },
-            })}
-            className={`rounded-full ${
-              i === 0
-                ? "bg-secondary"
-                : i === segments.length - 1
+        {segments.map(({ getSegmentProps }, i) => {
+          const { key, ...segmentProps } = getSegmentProps({
+            style: { position: "absolute", height: "100%" },
+          });
+          return (
+            <div
+              key={key}
+              {...segmentProps}
+              className={`rounded-full ${
+                i === 0
+                  ? "bg-secondary"
+                  : i === segments.length - 1
                   ? "bg-[#C1D9F6]"
                   : i % 2 === 0
-                    ? "bg-secondary"
-                    : "bg-primary"
-            }`}
-          />
-        ))}
+                  ? "bg-secondary"
+                  : "bg-primary"
+              }`}
+            />
+          );
+        })}
 
         {/* handles */}
-        {handles.map(({ value, active, getHandleProps }, idx) => (
-          <button
-            key={idx}
-            {...getHandleProps({
-              style: {
-                position: "absolute",
-                appearance: "none",
-                border: "none",
-                background: "transparent",
-                outline: "none",
-              },
-            })}
-            className="focus:outline-none"
-          >
-            <div
-              className={`bg-primary flex items-center justify-center w-8 h-8 rounded-full text-xs text-white shadow-lg transform transition-all ${
-                active
-                  ? "translate-y-[-100%] scale-110"
-                  : "translate-y-0 scale-90"
-              }`}
-            >
-              {value}
-            </div>
-          </button>
-        ))}
+        {handles.map(({ value, active, getHandleProps }, idx) => {
+          const { key, ...handleProps } = getHandleProps({
+            style: {
+              position: "absolute",
+              appearance: "none",
+              border: "none",
+              background: "transparent",
+              outline: "none",
+            },
+          });
+          return (
+            <button key={key} {...handleProps} className="focus:outline-none">
+              <div
+                className={`bg-primary flex items-center justify-center w-8 h-8 rounded-full text-xs text-white shadow-lg transform transition-all ${
+                  active
+                    ? "translate-y-[-100%] scale-110"
+                    : "translate-y-0 scale-90"
+                }`}
+              >
+                {value}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* legenda + wynik */}

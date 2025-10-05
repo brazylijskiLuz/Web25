@@ -3,10 +3,13 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Accessibility } from "lucide-react";
+import { useAccessibility } from "@/stores/useAccessibility";
 
 export const Header = () => {
   const pathname = usePathname();
   const isAdminPage = pathname === "/admin";
+  const { setAccessibilityPanelOpen } = useAccessibility();
 
   return (
     <header className="flex justify-between py-6">
@@ -16,7 +19,16 @@ export const Header = () => {
       >
         Symulator <span className="text-primary">Emerytalny</span>
       </Link>
-      <nav>
+      <nav className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setAccessibilityPanelOpen(true)}
+          aria-label="Otwórz ustawienia dostępności"
+          title="Ustawienia dostępności WCAG 2.0"
+        >
+          <Accessibility className="h-5 w-5" />
+        </Button>
         <Button variant={"outline"} asChild>
           <Link href={isAdminPage ? "/" : "/admin"}>
             {isAdminPage ? "Strona główna" : "Panel administratora"}

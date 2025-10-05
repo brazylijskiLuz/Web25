@@ -213,3 +213,195 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+/* ===== ACCESSIBILITY STYLES WCAG 2.0 ===== */
+
+/* Font Size Adjustments */
+[data-font-size="large"] {
+  font-size: 1.125rem; /* 18px */
+}
+
+[data-font-size="extra-large"] {
+  font-size: 1.25rem; /* 20px */
+}
+
+/* Line Height Adjustments */
+[data-line-height="relaxed"] {
+  line-height: 1.75;
+}
+
+[data-line-height="loose"] {
+  line-height: 2;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #000000;
+  --card-foreground: #ffffff;
+  --popover: #000000;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #333333;
+  --secondary-foreground: #ffffff;
+  --muted: #333333;
+  --muted-foreground: #ffffff;
+  --accent: #ffffff;
+  --accent-foreground: #000000;
+  --destructive: #ff0000;
+  --destructive-foreground: #ffffff;
+  --border: #ffffff;
+  --input: #ffffff;
+  --ring: #ffffff;
+}
+
+.high-contrast * {
+  border-color: currentColor !important;
+}
+
+/* Enhanced Focus Indicators */
+[data-focus-indicator="high-visibility"] *:focus-visible {
+  outline: 3px solid #ff0000 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 6px rgba(255, 0, 0, 0.3) !important;
+}
+
+/* Reduced Motion */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Screen Reader Optimizations */
+.screen-reader-optimized {
+  /* Ensure proper heading hierarchy */
+}
+
+.screen-reader-optimized .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Keyboard Navigation Enhancements */
+[data-keyboard-navigation="true"] *:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Skip Links for Keyboard Navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* ARIA Live Regions */
+.live-region {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* High Contrast Button Variants */
+.high-contrast .btn-primary {
+  background-color: #ffffff;
+  color: #000000;
+  border: 2px solid #000000;
+}
+
+.high-contrast .btn-primary:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.high-contrast .btn-outline {
+  background-color: transparent;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+.high-contrast .btn-outline:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Enhanced Link Contrast */
+.high-contrast a {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Form Element Enhancements */
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  border: 2px solid #ffffff;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.high-contrast input:focus,
+.high-contrast select:focus,
+.high-contrast textarea:focus {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+/* Card and Container Enhancements */
+.high-contrast .card,
+.high-contrast .container {
+  border: 1px solid #ffffff;
+}
+
+/* Ensure sufficient color contrast ratios */
+.high-contrast .text-muted-foreground {
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+
+/* Error and Success States */
+.high-contrast .error {
+  color: #ff0000;
+  border-color: #ff0000;
+}
+
+.high-contrast .success {
+  color: #00ff00;
+  border-color: #00ff00;
+}
+
+/* Responsive adjustments for accessibility */
+@media (max-width: 768px) {
+  [data-font-size="large"] {
+    font-size: 1rem;
+  }
+
+  [data-font-size="extra-large"] {
+    font-size: 1.125rem;
+  }
+}

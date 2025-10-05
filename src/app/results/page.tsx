@@ -61,6 +61,58 @@ const formatDecimal = (value: number, decimals = 1): string => {
   }).format(value);
 };
 
+export default function ResultsPage() {
+  // Mock data for demonstration - in real app this would come from props or API
+  const mockData = {
+    emerytura_nominalna_miesieczna_brutto: 2500,
+    emerytura_urealniona_miesieczna_brutto: 2000,
+    emerytura_nominalna_miesieczna_netto: 2000,
+    emerytura_urealniona_miesieczna_netto: 1600,
+    rok_przejscia_na_emeryture: 2050,
+    wiek_przejscia_na_emeryture: 65,
+    stopa_zastapienia_procent: 60,
+    procent_przecietnego_wynagrodzenia: 60,
+    przecietne_wynagrodzenie_w_roku: 4000,
+    wynagrodzenie_w_roku_emerytury: 6000,
+    kapital_emerytalny: {
+      konto: 100000,
+      subkonto: 50000,
+      suma: 150000,
+    },
+    srednie_dalsze_trwanie_zycia_miesiace: 240,
+    lata_skladkowe: 40,
+    inflacja_skumulowana: 2.5,
+  };
+
+  return (
+    <div className="mt-20 flex w-full mx-auto px-4">
+      <div className="w-full">
+        <label className="text-[20px] font-semibold">Kwota nominalna</label>
+        <h1 className="text-[108px] font-black leading-[108px] text-primary">
+          {formatCurrency(mockData.emerytura_nominalna_miesieczna_brutto)} zł
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2">
+          Kwota netto:{" "}
+          {formatCurrency(mockData.emerytura_nominalna_miesieczna_netto)} zł
+        </p>
+
+        <label className="flex items-center gap-2 mt-12">
+          <p className="text-[20px] font-semibold">Kwota urealniona</p>
+          <AlertCircle className="w-4 h-4" aria-hidden="true" />
+        </label>
+        <h2 className="font-black text-[80px] text-chart-4 leading-[80px]">
+          {formatCurrency(mockData.emerytura_urealniona_miesieczna_brutto)} zł
+        </h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          Kwota netto:{" "}
+          {formatCurrency(mockData.emerytura_urealniona_miesieczna_netto)} zł (w
+          cenach {new Date().getFullYear()})
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export const Results = ({ data }: ResultsProps) => {
   return (
     <div className="mt-20 flex w-full  mx-auto px-4">
@@ -76,7 +128,7 @@ export const Results = ({ data }: ResultsProps) => {
 
         <label className="flex items-center gap-2 mt-12">
           <p className="text-[20px] font-semibold">Kwota urealniona</p>
-          <AlertCircle className="w-4 h-4" />
+          <AlertCircle className="w-4 h-4" aria-hidden="true" />
         </label>
         <h2 className="font-black text-[80px] text-chart-4 leading-[80px]">
           {formatCurrency(data.emerytura_urealniona_miesieczna_brutto)} zł
