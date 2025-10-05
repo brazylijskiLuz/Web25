@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "../ui/progress";
 import { getRandomFact } from "@/lib/facts";
+import useUserData from "@/stores/useUserData";
 import {
   ChartContainer,
   ChartLegend,
@@ -188,6 +189,7 @@ export const StaticChat = ({
   showNewContent,
   onResultsReceived,
 }: StaticChatProps) => {
+  const { setUserData } = useUserData();
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [userInput, setUserInput] = useState("");
   const [botPending, setBotPending] = useState(false);
@@ -320,6 +322,38 @@ export const StaticChat = ({
     setMessages((prev) => [...prev, newUserMessage]);
     setUserInput("");
     setBotPending(true);
+
+    // Save user data to store based on question index
+    const allMessages = [...messages, newUserMessage];
+    const userAnswers = allMessages
+      .filter((msg) => msg.type === "user")
+      .map((msg) => msg.content);
+    
+    const currentAnswerIndex = userAnswers.length - 1;
+    
+    // Map answers to userData fields based on question order
+    switch (currentAnswerIndex) {
+      case 0: // Wysokość emerytury
+        setUserData({ desired_pension_amount: Number(content) || 0 });
+        break;
+      case 1: // Wiek
+        setUserData({ age: Number(content) || 0 });
+        break;
+      case 2: // Płeć
+        setUserData({ 
+          gender: content.toLowerCase().includes('kobieta') ? 'female' : 'male' 
+        });
+        break;
+      case 3: // Wynagrodzenie brutto
+        setUserData({ current_salary: Number(content) || 0 });
+        break;
+      case 4: // Rok rozpoczęcia pracy - convert to years of experience
+        const startYear = Number(content) || 0;
+        const currentYear = new Date().getFullYear();
+        const yearsOfWork = Math.max(0, currentYear - startYear);
+        // We don't have direct mapping for work years, but we can calculate age-related data
+        break;
+    }
 
     // Note: fullQueue computed above with potential additions
 

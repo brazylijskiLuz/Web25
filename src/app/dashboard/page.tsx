@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import useAvatar from "@/stores/useAvatar";
+import useUserData from "@/stores/useUserData";
 import { Info } from "lucide-react";
 import { SelectionField } from "@/components/ui/selection-field";
 import { ChatPanel } from "@/components/ui/chat-panel";
@@ -91,17 +92,10 @@ const DATA = {
   ],
 };
 
-const USER_DATA = {
-  desired_pension_amount: 5000,
-  age: 35,
-  gender: "male",
-  current_salary: 8000,
-  konto_zus: DATA.kapital_emerytalny.konto,
-  subkonto_zus: DATA.kapital_emerytalny.subkonto,
-};
-
 const Dashboard = () => {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
+  const { userData, setUserData } = useUserData();
+  console.log("tusoo", userData);
   const [numberOfChildren, setNumberOfChildren] = useState(3);
   const [values, setValues] = useState<number[]>([25, 65]);
   const [startAge, setStartAge] = useState<number | null>();
@@ -109,7 +103,6 @@ const Dashboard = () => {
   const [validationError, setValidationError] = useState<string>("");
   const [kodPocztowy, setKodPocztowy] = useState(null);
 
-  const [userData, setUserData] = useState(USER_DATA);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
 
   // TODO: Replace with API call
@@ -126,13 +119,13 @@ const Dashboard = () => {
         subAccountBalance: userData.subkonto_zus,
         pension: DATA.emerytura_nominalna_miesieczna_brutto,
         realPension: DATA.emerytura_urealniona_miesieczna_brutto,
-        postalCode: kodPocztowy
+        postalCode: kodPocztowy,
       };
 
-      const response = await fetch('/api/report/create', {
-        method: 'POST',
+      const response = await fetch("/api/report/create", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
@@ -142,23 +135,23 @@ const Dashboard = () => {
       }
 
       const result = await response.json();
-      console.log('Report created successfully:', result);
-      
+      console.log("Report created successfully:", result);
+
       if (result && result.value) {
         let url = result.value;
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+          url = "https://" + url;
         }
         setReportUrl(url);
       }
     } catch (error) {
-      console.error('Error sending report to API:', error);
+      console.error("Error sending report to API:", error);
     }
   };
 
   const downloadReport = () => {
     if (reportUrl) {
-      window.open(reportUrl, '_blank');
+      window.open(reportUrl, "_blank");
     }
   };
 
@@ -250,7 +243,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <UserDataPanel 
+        <UserDataPanel
           userData={userData}
           onUserDataChange={setUserData}
           kodPocztowy={kodPocztowy}
