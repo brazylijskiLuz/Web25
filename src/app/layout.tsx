@@ -6,6 +6,7 @@ import { AvatarBackground } from "../../layout/avatar-background";
 import { AccessibilityPanel } from "@/components/ui/accessibility-panel";
 import { AccessibilityProvider } from "@/components/ui/accessibility-provider";
 import { SkipLink } from "@/components/ui/skip-link";
+import { ConditionalLayout } from "./conditional-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +37,7 @@ export default function RootLayout({
         <AccessibilityProvider>
           <SkipLink />
           <Header />
-          <AvatarBackground circlePosition="middle" assistant="hand-raised">
-            <main id="main-content" role="main" className="w-full">
-              {children}
-            </main>
-          </AvatarBackground>
+          <ConditionalLayout>{children}</ConditionalLayout>
           <AccessibilityPanel />
         </AccessibilityProvider>
       </body>
