@@ -150,7 +150,7 @@ const Dashboard = () => {
             Ścieżka życia <Info className="w-4 h-4 ml-2 " />
           </h2>
           <MultiRange values={values} onChange={setValues} className={"mt-8"} />
-          <RangesPanel values={values} setValues={setValues} />
+          <RangesPanel values={values} setValues={setValues} onAddToChat={handleAddToChat} />
           <div className="mt-6">
             <h3 className="text-sm font-medium text-gray-700 mb-3">Dodaj nowy zakres pracy</h3>
             <div className="flex gap-4">
@@ -187,9 +187,11 @@ const Dashboard = () => {
             value={numberOfChildren}
             displayValue={`${numberOfChildren} dzieci`}
             options={[
-              { value: 1, label: "Opcja 1" },
-              { value: 2, label: "Opcja 1" },
-              { value: 3, label: "Opcja 1" },
+              { value: "umowa-o-prace", label: "Umowa o pracę" },
+              { value: "zlecenie", label: "Zlecenie" },
+              { value: "wlasna-dzialalnosc", label: "Własna działalność" },
+              { value: "sluzby-mundurowe", label: "Służby Mundurowe" },
+              { value: "staz", label: "Staż" },
             ]}
             onChange={(value: string | number) =>
               setNumberOfChildren(value as number)
