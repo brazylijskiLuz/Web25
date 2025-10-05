@@ -295,7 +295,20 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
           })
         )}
       >
-        <Image src="/pattern.png" alt="pattern" fill priority />
+        <Image
+          src="/pattern.png"
+          alt="pattern"
+          width={2048}
+          height={2048}
+          style={{
+            objectFit: "cover",
+            width: "100%",
+            height: "100%",
+          }}
+          priority
+          quality={100}
+          unoptimized
+        />
       </div>
 
       <div className="relative z-10 flex flex-col items-center justify-center">
@@ -313,9 +326,16 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
         <Image
           src="/circle.svg"
           alt="circle"
-          fill
-          style={{ objectFit: "contain" }}
+          width={2048}
+          height={2048}
+          style={{
+            objectFit: "contain",
+            width: "100%",
+            height: "100%",
+          }}
           priority
+          quality={95}
+          unoptimized
         />
       </div>
       <div
@@ -329,9 +349,16 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
         <Image
           src={getAssistantImagePath(avatar.avatarAssistant)}
           alt="assistant"
-          fill
-          style={{ objectFit: "contain" }}
+          width={2048}
+          height={2048}
+          style={{
+            objectFit: "contain",
+            width: "100%",
+            height: "100%",
+          }}
           priority
+          quality={95}
+          unoptimized
         />
       </div>
     </div>
