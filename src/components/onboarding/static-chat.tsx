@@ -427,6 +427,7 @@ export const StaticChat = ({
         // Map answers to fields
         // Index 0: Wysokość emerytury (pomijamy - nie ma w formacie)
         const desired = userAnswers[0] || "";
+        console.log({ desired });
         setDesiredPension(Number(desired));
         // Index 1: Wiek
         const wiek = userAnswers[1] || "";
@@ -451,6 +452,7 @@ export const StaticChat = ({
         formattedContent += `wynagrodzenie_brutto: ${wynagrodzenie_brutto}\n`;
         formattedContent += `rok_rozpoczecia_pracy: ${rok_rozpoczecia_pracy}\n`;
         formattedContent += `rok_zakonczenia_pracy: ${rok_zakonczenia_pracy}`;
+        formattedContent += `oczekiwana_emerytura: ${desired}`;
 
         // Add optional data if present
         if (przerwy_w_pracy || przerwy_laczna_liczba_miesiecy) {

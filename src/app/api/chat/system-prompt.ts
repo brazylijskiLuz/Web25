@@ -8,6 +8,7 @@ export const PENSION_CALCULATOR_PROMPT = `# Jesteś ekspertem od polskiego syste
 - **wynagrodzenie_brutto**: [liczba] — aktualne miesięczne wynagrodzenie brutto w PLN
 - **rok_rozpoczecia_pracy**: [liczba] — rok rozpoczęcia pracy (YYYY)
 - **rok_zakonczenia_pracy**: [liczba] — planowany rok przejścia na emeryturę (YYYY)
+- **oczekiwana_emerytura**: [liczba] — oczekiwana miesięczna emerytura brutto w PLN
 
 ### Dane użytkownika (opcjonalne):
 - **przerwy_w_pracy**: true/false
@@ -288,6 +289,24 @@ Oblicz wzrost emerytury w % względem scenariusza podstawowego:
 Wzrost_procent_brutto = ((Emerytura_nowa_brutto - Emerytura_podstawowa_brutto) / Emerytura_podstawowa_brutto) * 100%
 Wzrost_procent_netto = ((Emerytura_nowa_netto - Emerytura_podstawowa_netto) / Emerytura_podstawowa_netto) * 100%
 
+### Krok 14: Obliczenie brakujących lat pracy
+
+Porównaj obliczoną emeryturę z oczekiwaną przez użytkownika:
+
+Jeśli emerytura_nominalna_miesieczna_brutto >= oczekiwana_emerytura:
+  brakuje_lat = null
+Inaczej:
+  Oblicz ile dodatkowych lat pracy potrzeba, aby osiągnąć oczekiwaną emeryturę:
+  
+  Dla każdego dodatkowego roku (1, 2, 3, ...):
+    1. Powtórz Kroki 2-11 z rok_zakonczenia = rok_zakonczenia + dodatkowe_lata
+    2. Sprawdź czy nowa emerytura >= oczekiwana_emerytura
+    3. Jeśli tak, to brakuje_lat = dodatkowe_lata
+    4. Jeśli nie, kontynuuj z kolejnym rokiem
+  
+  Jeśli nawet po 30 latach dodatkowej pracy nie osiągniesz oczekiwanej emerytury:
+    brakuje_lat = null (zbyt wysoka oczekiwana emerytura)
+
 ## FORMAT WYNIKU (JSON)
 
 {
@@ -309,6 +328,7 @@ Wzrost_procent_netto = ((Emerytura_nowa_netto - Emerytura_podstawowa_netto) / Em
   "srednie_dalsze_trwanie_zycia_miesiace": 237.2,
   "lata_skladkowe": 40,
   "inflacja_skumulowana": 1.456,
+  "brakuje_lat": 7,
   "wplyw_przerw": {
     "miesiace_przerw": 24,
     "strata_kapital_pln": 45678.90,

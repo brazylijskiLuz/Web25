@@ -45,6 +45,7 @@ interface ResultsData {
   srednie_dalsze_trwanie_zycia_miesiace?: number;
   lata_skladkowe?: number;
   inflacja_skumulowana?: number;
+  brakuje_lat?: number | null;
   wplyw_przerw?: WplywPrzerw;
   scenariusze_dluzszej_pracy?: ScenariuszDluzszejPracy[];
   komunikaty?: string[];
@@ -76,7 +77,19 @@ const Results = () => {
   }, []);
 
   // Use data from context or fallback to mock data
-  const data: ResultsData = resultsData || {};
+  const data: ResultsData = resultsData || {
+    emerytura_nominalna_miesieczna_brutto: 0,
+    emerytura_urealniona_miesieczna_brutto: 0,
+    emerytura_nominalna_miesieczna_netto: 0,
+    emerytura_urealniona_miesieczna_netto: 0,
+    rok_przejscia_na_emeryture: 0,
+    stopa_zastapienia_procent: 0,
+    kapital_emerytalny: {
+      konto: 0,
+      subkonto: 0,
+      suma: 0,
+    },
+  };
 
   return (
     <>
@@ -105,13 +118,17 @@ const Results = () => {
           </p>
 
           {/* Brakuje Ci X lat pracy */}
-          <div className="mt-12">
-            <p className="text-xl text-gray-900">
-              Brakuje Ci{" "}
-              <span className="text-orange-500 font-bold">7 lat</span> pracy do
-              osiągnięcia oczekiwanej kwoty
-            </p>
-          </div>
+          {data.brakuje_lat !== null && data.brakuje_lat !== undefined && (
+            <div className="mt-12">
+              <p className="text-xl text-gray-900">
+                Brakuje Ci{" "}
+                <span className="text-orange-500 font-bold">
+                  {data.brakuje_lat} lat
+                </span>{" "}
+                pracy do osiągnięcia oczekiwanej kwoty
+              </p>
+            </div>
+          )}
 
           {/* Stopa zastąpienia emerytury */}
           <div className="mt-12 bg-white p-8 rounded-lg border shadow-sm">
