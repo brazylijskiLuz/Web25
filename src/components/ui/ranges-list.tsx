@@ -146,25 +146,36 @@ export default function RangesPanel({
                           </option>
                           <option value="staz">Staż</option>
                         </select>
-                        {rangeSelections[`${r.start}-${r.end}`] && rangeSelections[`${r.start}-${r.end}`] !== "" && onAddToChat && (
-                          <button
-                            onClick={() => {
-                              const selectedType = rangeSelections[`${r.start}-${r.end}`];
-                              const questions = {
-                                "umowa-o-prace": "Jak umowa o pracę wpływa na wysokość emerytury?",
-                                "zlecenie": "Jaka jest różnica w emeryturze między umową o pracę a zleceniem?", 
-                                "wlasna-dzialalnosc": "Jak składki ZUS z własnej działalności wpływają na emeryturę?",
-                                "sluzby-mundurowe": "Jakie są korzyści emerytalne dla służb mundurowych?",
-                                "staz": "Czy okresy stażu liczą się do emerytury?"
-                              };
-                              const question = questions[selectedType as keyof typeof questions] || `Jak ${selectedType} wpływa na emeryturę?`;
-                              onAddToChat(question);
-                            }}
-                            className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs rounded transition-colors cursor-pointer border border-green-300 whitespace-nowrap"
-                          >
-                            Jak to wpływa?
-                          </button>
-                        )}
+                        {rangeSelections[`${r.start}-${r.end}`] &&
+                          rangeSelections[`${r.start}-${r.end}`] !== "" &&
+                          onAddToChat && (
+                            <button
+                              onClick={() => {
+                                const selectedType =
+                                  rangeSelections[`${r.start}-${r.end}`];
+                                const questions = {
+                                  "umowa-o-prace":
+                                    "Jak umowa o pracę wpływa na wysokość emerytury?",
+                                  zlecenie:
+                                    "Jaka jest różnica w emeryturze między umową o pracę a zleceniem?",
+                                  "wlasna-dzialalnosc":
+                                    "Jak składki ZUS z własnej działalności wpływają na emeryturę?",
+                                  "sluzby-mundurowe":
+                                    "Jakie są korzyści emerytalne dla służb mundurowych?",
+                                  staz: "Czy okresy stażu liczą się do emerytury?",
+                                };
+                                const question =
+                                  questions[
+                                    selectedType as keyof typeof questions
+                                  ] ||
+                                  `Jak ${selectedType} wpływa na emeryturę?`;
+                                onAddToChat(question);
+                              }}
+                              className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs rounded transition-colors cursor-pointer border border-green-300 whitespace-nowrap"
+                            >
+                              Jak to wpływa?
+                            </button>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -230,25 +241,42 @@ export default function RangesPanel({
                                   <option value="studia">Studia</option>
                                   <option value="inna">Inna</option>
                                 </select>
-                                {rangeSelections[`gap-${currentEnd}-${nextStart}`] && rangeSelections[`gap-${currentEnd}-${nextStart}`] !== "" && onAddToChat && (
-                                  <button
-                                    onClick={() => {
-                                      const selectedType = rangeSelections[`gap-${currentEnd}-${nextStart}`];
-                                      const questions = {
-                                        "przerwa-rodzicielska": "Jak urlop rodzicielski wpływa na wysokość emerytury?",
-                                        "bezrobocie": "Czy okresy bezrobocia liczą się do emerytury?",
-                                        "choroba": "Jak długotrwała choroba wpływa na emeryturę?", 
-                                        "studia": "Czy studia wyższe zwiększają wysokość emerytury?",
-                                        "inna": "Jak przerwy w pracy wpływają na wysokość emerytury?"
-                                      };
-                                      const question = questions[selectedType as keyof typeof questions] || `Jak ${selectedType} wpływa na emeryturę?`;
-                                      onAddToChat(question);
-                                    }}
-                                    className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded transition-colors cursor-pointer border border-red-300 whitespace-nowrap"
-                                  >
-                                    Jak to wpływa?
-                                  </button>
-                                )}
+                                {rangeSelections[
+                                  `gap-${currentEnd}-${nextStart}`
+                                ] &&
+                                  rangeSelections[
+                                    `gap-${currentEnd}-${nextStart}`
+                                  ] !== "" &&
+                                  onAddToChat && (
+                                    <button
+                                      onClick={() => {
+                                        const selectedType =
+                                          rangeSelections[
+                                            `gap-${currentEnd}-${nextStart}`
+                                          ];
+                                        const questions = {
+                                          "przerwa-rodzicielska":
+                                            "Jak urlop rodzicielski wpływa na wysokość emerytury?",
+                                          bezrobocie:
+                                            "Czy okresy bezrobocia liczą się do emerytury?",
+                                          choroba:
+                                            "Jak długotrwała choroba wpływa na emeryturę?",
+                                          studia:
+                                            "Czy studia wyższe zwiększają wysokość emerytury?",
+                                          inna: "Jak przerwy w pracy wpływają na wysokość emerytury?",
+                                        };
+                                        const question =
+                                          questions[
+                                            selectedType as keyof typeof questions
+                                          ] ||
+                                          `Jak ${selectedType} wpływa na emeryturę?`;
+                                        onAddToChat(question);
+                                      }}
+                                      className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded transition-colors cursor-pointer border border-red-300 whitespace-nowrap"
+                                    >
+                                      Jak to wpływa?
+                                    </button>
+                                  )}
                               </div>
                             </div>
                           </div>
@@ -313,11 +341,15 @@ export default function RangesPanel({
             <div className="text-sm font-medium text-blue-700 mb-1">
               Łączny okres pracy
             </div>
-            <div className="text-lg font-semibold text-blue-900">{total} lat</div>
+            <div className="text-lg font-semibold text-blue-900">
+              {total} lat
+            </div>
           </div>
           {onAddToChat && (
             <button
-              onClick={() => onAddToChat("Jak okres pracy wpływa na emeryturę?")}
+              onClick={() =>
+                onAddToChat("Jak okres pracy wpływa na emeryturę?")
+              }
               className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs rounded-full transition-colors cursor-pointer border border-blue-300"
             >
               Jak okres pracy wpływa na emeryturę?
@@ -325,6 +357,32 @@ export default function RangesPanel({
           )}
         </div>
       </div>
+
+      {/* Łączny okres przerwy - Break Period Summary */}
+      {gaps.length > 0 && (
+        <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-medium text-red-700 mb-1">
+                Łączny okres przerwy
+              </div>
+              <div className="text-lg font-semibold text-red-900">
+                {gaps.reduce((sum, gap) => sum + gap.length, 0)} lat
+              </div>
+            </div>
+            {onAddToChat && (
+              <button
+                onClick={() =>
+                  onAddToChat("Jak okres przerwy wpływa na emeryturę?")
+                }
+                className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded-full transition-colors cursor-pointer border border-red-300"
+              >
+                Jak okres przerwy wpływa na emeryturę?
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
