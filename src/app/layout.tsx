@@ -37,7 +37,7 @@ export default function RootLayout({
           <SkipLink />
           <Header />
           <AvatarBackground circlePosition="middle" assistant="hand-raised">
-            <main id="main-content" role="main">
+            <main id="main-content" role="main" className="w-full">
               {children}
             </main>
           </AvatarBackground>
