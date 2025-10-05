@@ -22,12 +22,12 @@ export const Header = () => {
       <nav className="flex items-center gap-4">
         <Button
           variant="ghost"
-          size="icon"
+          // size="icon"
           onClick={() => setAccessibilityPanelOpen(true)}
           aria-label="Otwórz ustawienia dostępności"
           title="Ustawienia dostępności WCAG 2.0"
         >
-          <Accessibility className="h-5 w-5" />
+          Dostępność <Accessibility className="h-5 w-5" />
         </Button>
         <Button variant={"outline"} asChild>
           <Link href={isAdminPage ? "/" : "/admin"}>
