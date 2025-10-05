@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "../ui/progress";
 import { getRandomFact } from "@/lib/facts";
+import useUserData from "@/stores/useUserData";
 import {
   ChartContainer,
   ChartLegend,
@@ -188,6 +189,7 @@ export const StaticChat = ({
   showNewContent,
   onResultsReceived,
 }: StaticChatProps) => {
+  const { setUserData } = useUserData();
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [userInput, setUserInput] = useState("");
   const [botPending, setBotPending] = useState(false);
@@ -351,6 +353,51 @@ export const StaticChat = ({
     setMessages((prev) => [...prev, newUserMessage]);
     setUserInput("");
     setBotPending(true);
+
+    // Save user data to store based on question index
+    const allMessages = [...messages, newUserMessage];
+    const userAnswers = allMessages
+      .filter((msg) => msg.type === "user")
+      .map((msg) => msg.content);
+    
+    const currentAnswerIndex = userAnswers.length - 1;
+    
+    // Map answers to userData fields based on question order
+    switch (currentAnswerIndex) {
+      case 0: // Wysokość emerytury
+        setUserData({ desired_pension_amount: Number(content) || 0 });
+        break;
+      case 1: // Wiek
+        setUserData({ age: Number(content) || 0 });
+        break;
+      case 2: // Płeć
+        setUserData({ 
+          gender: content.toLowerCase().includes('kobieta') ? 'female' : 'male' 
+        });
+        break;
+      case 3: // Wynagrodzenie brutto
+        setUserData({ current_salary: Number(content) || 0 });
+        break;
+      case 4: // Rok rozpoczęcia pracy
+        const startYear = Number(content) || 0;
+        setUserData({ rok_rozpoczecia_pracy: startYear });
+        
+        // Calculate expected retirement year (assuming 25-30 years of work)
+        const currentUserAge = allMessages
+          .filter((msg) => msg.type === "user")
+          .map((msg) => msg.content)[1]; // Age is at index 1
+        const age = Number(currentUserAge) || 0;
+        
+        // Standard retirement age in Poland: 60 for women, 65 for men
+        const gender = allMessages
+          .filter((msg) => msg.type === "user")
+          .map((msg) => msg.content)[2]; // Gender is at index 2
+        const retirementAge = gender?.toLowerCase().includes('kobieta') ? 60 : 65;
+        const retirementYear = new Date().getFullYear() + Math.max(0, retirementAge - age);
+        
+        setUserData({ rok_przejscia_na_emeryture: retirementYear });
+        break;
+    }
 
     // Note: fullQueue computed above with potential additions
 

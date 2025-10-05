@@ -151,26 +151,23 @@ export function MultiRange({
             })}
 
         {/* segments */}
-        {segments.map(({ getSegmentProps }, i) => {
-          const { key, ...segmentProps } = getSegmentProps({
-            style: { position: "absolute", height: "100%" },
-          });
-          return (
-            <div
-              key={key}
-              {...segmentProps}
-              className={`rounded-full ${
-                i === 0
-                  ? "bg-secondary"
-                  : i === segments.length - 1
-                  ? "bg-[#C1D9F6]"
-                  : i % 2 === 0
-                  ? "bg-secondary"
-                  : "bg-primary"
-              }`}
-            />
-          );
-        })}
+        {segments.map(({ getSegmentProps }, i) => (
+          <div
+            key={i}
+            {...getSegmentProps({
+              style: { position: "absolute", height: "100%" },
+            })}
+            className={`rounded-full ${
+              i === 0
+                ? "bg-secondary"
+                : i === segments.length - 1
+                ? "bg-[#C1D9F6]"
+                : i % 2 === 0
+                ? "bg-secondary"
+                : "bg-primary"
+            }`}
+          />
+        ))}
 
         {/* handles */}
         {handles.map(({ value, active, getHandleProps }, idx) => {
@@ -205,17 +202,6 @@ export function MultiRange({
           <LegendItem colorClass="bg-primary" label="Okres pracy" />
           <LegendItem colorClass="bg-secondary" label="Okres bez pracy" />
           <LegendItem colorClass="bg-[#C1D9F6]" label="Okres emerytalny" />
-        </div>
-
-        <div>
-          <div className="text-sm text-gray-600">Łączny okres pracy:</div>
-          <div className="mt-2 text-lg font-medium text-gray-800">
-            {primaryInfo.primaryRanges.length === 0
-              ? "0"
-              : `${primaryInfo.primaryRanges
-                  .map((r) => `${Math.round(r.from)}–${Math.round(r.to)}`)
-                  .join(", ")} (${Math.round(primaryInfo.total)} total)`}
-          </div>
         </div>
       </div>
     </div>
