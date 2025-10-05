@@ -673,23 +673,39 @@ export const StaticChat = ({
     }
   }, [hasForwarded.current]);
 
-  const randomFact = useMemo(() => getRandomFact(), []);
+  const [randomFact, setRandomFact] = useState(() => getRandomFact());
+
+  // Change random fact every 3 seconds during loading
+  useEffect(() => {
+    if (!showSpinner) return;
+
+    const interval = setInterval(() => {
+      setRandomFact(getRandomFact());
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [showSpinner]);
 
   // When loading, replace chat UI with standalone progress screen
   if (showSpinner) {
     return (
       <div className="w-full h-auto flex items-center justify-center mt-14">
         <div className="rounded-md p-6 flex flex-col max-w-80 items-center gap-4 min-w-[320px]">
-          <p className="text-xl font-bold mb-4">
-            Obliczamy twoją <span className="text-primary">emeryturę</span>
+          <p className="text-xl font-bold mb-4 text-center w-full">
+            Obliczamy twoją <span className="text-primary">emeryturę</span>.
           </p>
           <Progress
             value={progress}
             className="w-64 transition-all duration-700"
           />
-          <p className="text-sm text-muted-foreground text-center pb-2">
-            {randomFact}
-          </p>
+          <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm w-[30vw] mt-10 justify-center">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide">
+              Ciekawostka
+            </h3>
+            <p className="text-sm text-gray-700 text-left leading-relaxed">
+              {randomFact}
+            </p>
+          </div>
         </div>
       </div>
     );
