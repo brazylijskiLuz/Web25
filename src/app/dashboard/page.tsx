@@ -183,6 +183,7 @@ const Dashboard = () => {
       description: "",
       isUser: true,
     };
+    //@ts-ignore
     setMessages((prev) => [...prev, newMessage]);
   };
 
@@ -309,7 +310,11 @@ const Dashboard = () => {
       </div>
       <div className="w-[40%] h-full overflow-visible">
         <div className="sticky top-16 w-full h-[640px] overflow-hidden">
-          <ChatPanel messages={messages} userData={userData} resultsData={resultsData} />
+          <ChatPanel
+            messages={messages}
+            userData={userData}
+            resultsData={resultsData}
+          />
         </div>
       </div>
     </div>

@@ -76,7 +76,7 @@ const Results = () => {
   }, []);
 
   // Use data from context or fallback to mock data
-  const data: ResultsData = resultsData;
+  const data: ResultsData = resultsData || {};
 
   return (
     <>
