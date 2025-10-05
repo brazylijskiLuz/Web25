@@ -80,9 +80,9 @@ Używaj tych danych do udzielania spersonalizowanych odpowiedzi o emeryturze uż
     return response;
   } catch (error) {
     console.error("💥 Error in dashboard chat API:");
-    console.error("Error type:", error?.constructor?.name);
-    console.error("Error message:", error?.message);
-    console.error("Error stack:", error?.stack);
+    console.error("Error type:", (error as any)?.constructor?.name);
+    console.error("Error message:", (error as Error)?.message);
+    console.error("Error stack:", (error as Error)?.stack);
     console.error(
       "Full error object:",
       JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
@@ -91,7 +91,7 @@ Używaj tych danych do udzielania spersonalizowanych odpowiedzi o emeryturze uż
     return new Response(
       JSON.stringify({
         error: "Internal server error",
-        details: error?.message || "Unknown error",
+        details: (error as Error)?.message || "Unknown error",
       }),
       {
         status: 500,

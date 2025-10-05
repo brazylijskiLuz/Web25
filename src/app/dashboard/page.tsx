@@ -116,7 +116,7 @@ const Dashboard = () => {
   const [startAge, setStartAge] = useState<number | null>();
   const [endAge, setEndAge] = useState<number | null>();
   const [validationError, setValidationError] = useState<string>("");
-  const [kodPocztowy, setKodPocztowy] = useState(null);
+  const [kodPocztowy, setKodPocztowy] = useState(userData.kod_pocztowy || null);
 
   const [reportUrl, setReportUrl] = useState<string | null>(null);
 
@@ -134,7 +134,7 @@ const Dashboard = () => {
         subAccountBalance: userData.subkonto_zus,
         pension: resultsData?.emerytura_nominalna_miesieczna_brutto || 0,
         realPension: resultsData?.emerytura_urealniona_miesieczna_brutto || 0,
-        postalCode: kodPocztowy,
+        postalCode: userData.kod_pocztowy || kodPocztowy,
         age: userData.age,
         data: resultsData?.scenariusze_dluzszej_pracy,
       };
@@ -183,6 +183,7 @@ const Dashboard = () => {
       description: "",
       isUser: true,
     };
+    //@ts-ignore
     setMessages((prev) => [...prev, newMessage]);
   };
 
@@ -276,7 +277,10 @@ const Dashboard = () => {
           userData={userData}
           onUserDataChange={setUserData}
           kodPocztowy={kodPocztowy}
-          onKodPocztowyChange={setKodPocztowy}
+          onKodPocztowyChange={(kod) => {
+            setKodPocztowy(kod);
+            setUserData({ kod_pocztowy: kod });
+          }}
         />
 
         {/* Komunikaty */}
@@ -306,7 +310,11 @@ const Dashboard = () => {
       </div>
       <div className="w-[40%] h-full overflow-visible">
         <div className="sticky top-16 w-full h-[640px] overflow-hidden">
-          <ChatPanel messages={messages} userData={resultsData || {}} />
+          <ChatPanel
+            messages={messages}
+            userData={userData}
+            resultsData={resultsData}
+          />
         </div>
       </div>
     </div>
