@@ -200,7 +200,6 @@ export const StaticChat = ({
   const loadingStartRef = useRef<number | null>(null);
   const [desiredPension, setDesiredPension] = useState<number | null>(null);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [hoverBar, setHoverBar] = useState<number | null>(null);
   const [additionalQueue, setAdditionalQueue] = useState<
     Omit<MessageData, "id">[]
   >([]);
@@ -555,6 +554,23 @@ export const StaticChat = ({
     return () => clearInterval(timer);
   }, [showSpinner]);
 
+  // Clear validation error when input becomes valid again
+  useEffect(() => {
+    if (!validationError) return;
+    const lastBot = lastMessage;
+    if (lastBot?.inputType === "number" && lastBot.validation) {
+      const val = Number(userInput);
+      if (!Number.isNaN(val)) {
+        const { min, max } = lastBot.validation;
+        if ((min == null || val >= min) && (max == null || val <= max)) {
+          setValidationError(null);
+        }
+      }
+    } else if (userInput.trim()) {
+      setValidationError(null);
+    }
+  }, [userInput, lastMessage, validationError]);
+
   // Once data forwarding completes, fill progress bar quickly
   useEffect(() => {
     if (hasForwarded.current) {
@@ -658,12 +674,8 @@ A jak wygląda Twoja emerytura w porównaniu z innymi? Sprawdź!`}
                     <ChartContainer
                       config={{ bar: { color: "#3f84d2", label: "Kwota" } }}
                       className="w-full h-full"
-                      data-hover-goal={hoverBar === goalIdx}
                     >
-                      <BarChart
-                        data={chartData}
-                        onMouseLeave={() => setHoverBar(null)}
-                      >
+                      <BarChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         {/* Tooltip only, cursor color via CSS */}
