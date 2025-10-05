@@ -17,12 +17,12 @@ interface UserDataStore {
 }
 
 const initialUserData: UserData = {
-  desired_pension_amount: 5000,
-  age: 35,
+  desired_pension_amount: 0,
+  age: 0,
   gender: "male",
-  current_salary: 8000,
-  konto_zus: 508432.67,
-  subkonto_zus: 111567.33,
+  current_salary: 0,
+  konto_zus: 0,
+  subkonto_zus: 0,
 };
 
 const useUserData = create<UserDataStore>()(
@@ -30,18 +30,18 @@ const useUserData = create<UserDataStore>()(
     (set) => ({
       userData: initialUserData,
       setUserData: (data) => {
-        console.log('setUserData called with:', data);
+        console.log("setUserData called with:", data);
         set((state) => {
           const newState = { userData: { ...state.userData, ...data } };
-          console.log('old state:', state.userData);
-          console.log('new state:', newState.userData);
+          console.log("old state:", state.userData);
+          console.log("new state:", newState.userData);
           return newState;
         });
       },
       resetUserData: () => set({ userData: initialUserData }),
     }),
     {
-      name: 'user-data-storage',
+      name: "user-data-storage",
     }
   )
 );
