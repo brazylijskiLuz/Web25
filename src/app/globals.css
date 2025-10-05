@@ -267,6 +267,21 @@
   border-color: currentColor !important;
 }
 
+/* Remove border from header navigation button */
+.no-border,
+.high-contrast .no-border {
+  border: none !important;
+  border-color: transparent !important;
+}
+
+/* Remove border from header link */
+header .no-border,
+.high-contrast header .no-border {
+  border: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+}
+
 /* Enhanced Focus Indicators */
 [data-focus-indicator="high-visibility"] *:focus-visible {
   outline: 3px solid #ff0000 !important;
