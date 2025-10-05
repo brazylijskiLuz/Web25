@@ -273,26 +273,30 @@ const Dashboard = () => {
           onKodPocztowyChange={setKodPocztowy}
         />
 
-        {/* Ilość dzieci - separate component */}
-        <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
-          <SelectionField
-            title="Ilość dzieci"
-            description="Tutaj opis jak to wpływa na kwotę wyliczonej emerytury"
-            value={numberOfChildren}
-            displayValue={`${numberOfChildren} dzieci`}
-            options={[
-              { value: "umowa-o-prace", label: "Umowa o pracę" },
-              { value: "zlecenie", label: "Zlecenie" },
-              { value: "wlasna-dzialalnosc", label: "Własna działalność" },
-              { value: "sluzby-mundurowe", label: "Służby Mundurowe" },
-              { value: "staz", label: "Staż" },
-            ]}
-            onChange={(value: string | number) =>
-              setNumberOfChildren(value as number)
-            }
-            onInfoClick={() => console.log("Info clicked")}
-          />
-        </div>
+        {/* Komunikaty */}
+        {resultsData?.komunikaty && resultsData.komunikaty.length > 0 && (
+          <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                <div className="w-2 h-2 bg-secondary-foreground rounded-full"></div>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Komunikaty
+              </h3>
+            </div>
+            <div className="space-y-4">
+              {resultsData.komunikaty.slice(0, 5).map((komunikat, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 py-3 border-b border-gray-200 last:border-b-0"
+                >
+                  <div className="w-2 h-2 bg-chart-1 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-gray-700 leading-relaxed">{komunikat}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <div className="w-[40%] h-full overflow-visible">
         <div className="sticky top-16 w-full h-[640px] overflow-hidden">

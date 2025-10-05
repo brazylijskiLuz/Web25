@@ -329,30 +329,6 @@ const Results = () => {
               </div>
             </div>
           </div>
-
-          {data.komunikaty && data.komunikaty.length > 0 && (
-            <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                  <div className="w-2 h-2 bg-secondary-foreground rounded-full"></div>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Komunikaty
-                </h3>
-              </div>
-              <div className="space-y-4">
-                {data.komunikaty.map((komunikat, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 py-3 border-b border-gray-200 last:border-b-0"
-                  >
-                    <div className="w-2 h-2 bg-chart-1 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-gray-700 leading-relaxed">{komunikat}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
