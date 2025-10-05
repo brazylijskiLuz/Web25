@@ -298,9 +298,7 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
         <Image src="/pattern.png" alt="pattern" fill priority />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center">
-        {children}
-      </div>
+      <div className="relative z-10 flex">{children}</div>
 
       <div
         className={cn(
