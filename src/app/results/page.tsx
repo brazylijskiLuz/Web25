@@ -2,6 +2,7 @@
 import { AlertCircle } from "lucide-react";
 import useAvatar from "@/stores/useAvatar";
 import { useEffect } from "react";
+import { useHideAvatarGraphics } from "@/hooks/useHideAvatarGraphics";
 import { useRouter } from "next/navigation";
 import useResultsData from "@/stores/useResultsData";
 
@@ -66,6 +67,8 @@ const formatDecimal = (value: number, decimals = 1): string => {
 
 const Results = () => {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
+  // hide assistant on medium screens
+  useHideAvatarGraphics(800, true);
   const router = useRouter();
   const { resultsData } = useResultsData();
 
@@ -79,30 +82,60 @@ const Results = () => {
   const data: ResultsData = resultsData || {};
 
   return (
-    <>
-      <div className="mt-20 flex w-full px-4 pb-10">
-        <div className="w-[60%]">
-          <label className="text-[20px] font-semibold">Kwota nominalna</label>
-          <h1 className="text-[108px] font-black leading-[108px] text-primary">
-            {formatCurrency(data.emerytura_nominalna_miesieczna_brutto)} zł
-          </h1>
-          <p className="text-sm text-muted-foreground mt-2">
-            Kwota netto:{" "}
-            {formatCurrency(data.emerytura_nominalna_miesieczna_netto)} zł
+    <div className="mt-20 flex w-full px-4 pb-10">
+      <div className="w-full md:w-[60%]">
+        <label className="text-[17px] md:text-[20px] font-semibold">
+          Kwota nominalna
+        </label>
+        <h1 className="text-[48px] lg:text-[108px] font-black leading-[108px] text-primary">
+          {formatCurrency(data.emerytura_nominalna_miesieczna_brutto)} zł
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2">
+          Kwota netto:{" "}
+          {formatCurrency(data.emerytura_nominalna_miesieczna_netto)} zł
+        </p>
+
+        <label className="flex items-center gap-2 mt-12">
+          <p className="text-[17px] md:text-[20px] font-semibold">
+            Kwota urealniona
+          </p>
+          <AlertCircle className="w-4 h-4" />
+        </label>
+        <h2 className="font-black text-[32px] lg:text-[80px] text-chart-1 leading-[80px]">
+          {formatCurrency(data.emerytura_urealniona_miesieczna_brutto)} zł
+        </h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          Kwota netto:{" "}
+          {formatCurrency(data.emerytura_urealniona_miesieczna_netto)} zł (w
+          cenach {new Date().getFullYear()})
+        </p>
+
+        {/* Brakuje Ci X lat pracy */}
+        <div className="mt-12">
+          <p className="text-xl text-gray-900">
+            Brakuje Ci <span className="text-orange-500 font-bold">7 lat</span>{" "}
+            pracy do osiągnięcia oczekiwanej kwoty
           </p>
 
-          <label className="flex items-center gap-2 mt-12">
-            <p className="text-[20px] font-semibold">Kwota urealniona</p>
-            <AlertCircle className="w-4 h-4" />
-          </label>
-          <h2 className="font-black text-[80px] text-chart-1 leading-[80px]">
-            {formatCurrency(data.emerytura_urealniona_miesieczna_brutto)} zł
-          </h2>
-          <p className="text-sm text-muted-foreground mt-2">
-            Kwota netto:{" "}
-            {formatCurrency(data.emerytura_urealniona_miesieczna_netto)} zł (w
-            cenach {new Date().getFullYear()})
-          </p>
+        {/* Stopa zastąpienia emerytury */}
+        <div className="mt-12 bg-white p-8 rounded-lg border shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 md:w-2 md:h-2 bg-chart-1 rounded-full"></div>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900">
+              Stopa zastąpienia emerytury
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-4 mb-4">
+            <span className="text-5xl font-bold text-chart-1">
+              {formatDecimal(data.stopa_zastapienia_procent)}%
+            </span>
+            {/* <div className="w-6 h-6 bg-chart-1/20 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
+            </div> */}
+          </div>
 
           {/* Brakuje Ci X lat pracy */}
           <div className="mt-12">
@@ -113,15 +146,11 @@ const Results = () => {
             </p>
           </div>
 
-          {/* Stopa zastąpienia emerytury */}
-          <div className="mt-12 bg-white p-8 rounded-lg border shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900">
-                Stopa zastąpienia emerytury
-              </h3>
+        {/* Wartość emerytury bez uwzględnienia okresu chorobowego */}
+        <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
@@ -144,41 +173,113 @@ const Results = () => {
             </div>
           </div>
 
-          {/* Wartość emerytury bez uwzględnienia okresu chorobowego */}
-          <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900">
-                Wartość emerytury bez uwzględnienia okresu chorobowego
-              </h3>
+        {/* Różnica wysokości składki */}
+        <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
             </div>
 
-            <div className="space-y-4">
-              {/* Licząc okres chorobowy */}
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-6 bg-chart-1 rounded"></div>
-                <span className="text-lg font-semibold text-gray-900">
-                  {formatCurrency(data.emerytura_nominalna_miesieczna_brutto)}{" "}
-                  zł
-                </span>
-                <span className="text-sm text-gray-500">
-                  Licząc okres chorobowy
-                </span>
-              </div>
+          <div className="overflow-y-hidden overflow-x-auto border border-gray-200 rounded-lg">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-r border-gray-200">
+                    Lata opóźnienia
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-900 border-r border-gray-200">
+                    Składka miesięczna
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-900 border-r border-gray-200">
+                    Emerytura miesięczna
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">
+                    Różnica w stosunku do teraz
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    Teraz
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    2 450 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    {formatCurrency(data.emerytura_nominalna_miesieczna_brutto)}{" "}
+                    zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900">
+                    -
+                  </td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    +1 rok
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    2 680 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    13 420 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-primary font-medium">
+                    +768 zł
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    +2 lata
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    2 920 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    14 680 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-primary font-medium">
+                    +2 028 zł
+                  </td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    +5 lat
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    3 580 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    18 240 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-primary font-medium">
+                    +5 588 zł
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r border-gray-200">
+                    +10 lat
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    4 890 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                    24 960 zł
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-primary font-medium">
+                    +12 308 zł
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-              {/* Bez okresu chorobowego */}
-              <div className="flex items-center gap-4">
-                <div className="w-32 h-6 bg-primary rounded"></div>
-                <span className="text-lg font-semibold text-gray-900">
-                  {formatCurrency(data.emerytura_urealniona_miesieczna_brutto)}{" "}
-                  zł
-                </span>
-                <span className="text-sm text-gray-500">
-                  Bez okresu chorobowego
-                </span>
-              </div>
+        {/* Różnica wygenerowanej emerytury */}
+        <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
             </div>
           </div>
 
@@ -294,8 +395,8 @@ const Results = () => {
           {/* Różnica wygenerowanej emerytury */}
           <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
+              <div className="md:w-8 w-9 h-9 md:h-8 bg-secondary rounded-full flex items-center justify-center">
+                <div className="w-2 h-2 bg-secondary-foreground rounded-full"></div>
               </div>
               <h3 className="text-xl font-semibold text-gray-900">
                 Różnica wygenerowanej emerytury względem średniej prognozowanej

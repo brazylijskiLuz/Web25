@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased px-20`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased px-4 lg:px-20`}
       >
         <AccessibilityProvider>
           <SkipLink />

@@ -5,11 +5,13 @@ import { Title } from "@/components/onboarding/title";
 import { StaticChat } from "@/components/onboarding/static-chat";
 import useAvatar from "@/stores/useAvatar";
 import { useRouter } from "next/navigation";
+import { useHideAvatarGraphics } from "@/hooks/useHideAvatarGraphics";
 import useResultsData from "@/stores/useResultsData";
 
 export default function Home() {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
   const router = useRouter();
+  useHideAvatarGraphics(450, true);
   const [isHidden, setIsHidden] = useState(false);
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);

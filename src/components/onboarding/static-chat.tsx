@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useHideAvatarGraphics } from "@/hooks/useHideAvatarGraphics";
 import { Message } from "./message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,6 +191,9 @@ export const StaticChat = ({
   showNewContent,
   onResultsReceived,
 }: StaticChatProps) => {
+  console.log(showNewContent, "show");
+  // Hide avatar graphics on small screens while chat active
+  useHideAvatarGraphics(800, showNewContent);
   const { setUserData } = useUserData();
   const { formatted, setFormatted } = useFormatted();
   const [messages, setMessages] = useState<MessageData[]>([]);
