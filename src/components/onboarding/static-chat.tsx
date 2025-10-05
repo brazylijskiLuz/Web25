@@ -70,7 +70,7 @@ const CHAT_MESSAGES: Omit<MessageData, "id">[] = [
     title: "Aktualne wynagrodzenie brutto",
     content: "Ile wynosi Twoje aktualne miesięczne wynagrodzenie brutto?",
     inputType: "number",
-    validation: { min: 3000, max: 100000, step: 1 },
+    validation: { min: 100, max: 100000, step: 1 },
   },
   {
     type: "bot",
@@ -583,8 +583,8 @@ export const StaticChat = ({
   // When loading, replace chat UI with standalone progress screen
   if (showSpinner) {
     return (
-      <div className="w-full h-full flex items-center justify-center mt-14">
-        <div className="bg-background rounded-md p-6 flex flex-col max-w-80 items-center gap-4 min-w-[320px]">
+      <div className="w-full h-auto flex items-center justify-center mt-14">
+        <div className="rounded-md p-6 flex flex-col max-w-80 items-center gap-4 min-w-[320px]">
           <p className="text-xl font-bold mb-4">
             Obliczamy twoją <span className="text-primary">emeryturę</span>
           </p>
@@ -592,7 +592,7 @@ export const StaticChat = ({
             value={progress}
             className="w-64 transition-all duration-700"
           />
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-sm text-muted-foreground text-center pb-2">
             {randomFact}
           </p>
         </div>
