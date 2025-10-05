@@ -3,17 +3,15 @@
 import { useEffect, useState } from "react";
 import { Title } from "@/components/onboarding/title";
 import { StaticChat } from "@/components/onboarding/static-chat";
-import { Results } from "@/components/onboarding/results";
 import useAvatar from "@/stores/useAvatar";
-import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
+  const router = useRouter();
   const [isHidden, setIsHidden] = useState(false);
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
-  const [resultsData, setResultsData] = useState<any>(null);
 
   useEffect(() => {
     setAvatarPosition("middle");
@@ -33,30 +31,22 @@ export default function Home() {
   };
 
   const handleResultsReceived = (data: any) => {
-    setResultsData(data);
-    setAvatarPosition("left");
-    setAvatarAssistant("pointing-left");
-    redirect("/results");
+    // Przekieruj na stronę results
+    router.push("/results");
   };
 
   return (
     <>
-      {!resultsData && (
-        <>
-          <Title
-            isHidden={isHidden}
-            animationFinished={animationFinished}
-            onStartClick={handleStartClick}
-          />
+      <Title
+        isHidden={isHidden}
+        animationFinished={animationFinished}
+        onStartClick={handleStartClick}
+      />
 
-          <StaticChat
-            showNewContent={showNewContent}
-            onResultsReceived={handleResultsReceived}
-          />
-        </>
-      )}
-
-      {resultsData && <Results data={resultsData} />}
+      <StaticChat
+        showNewContent={showNewContent}
+        onResultsReceived={handleResultsReceived}
+      />
     </>
   );
 }
