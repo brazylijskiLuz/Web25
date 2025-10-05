@@ -125,7 +125,10 @@ const Dashboard = () => {
     resultsData?.wiek_przejscia_na_emeryture || 0;
 
   const rokUrodzenia = 2025 - userData.age;
-  const [start, setStart] = useState(rokStartuPracy - rokUrodzenia);
+  // Fix: Calculate start age properly, default to 25 if rokStartuPracy is not set
+  const startAgeFromWorkYear =
+    rokStartuPracy > 0 ? rokStartuPracy - rokUrodzenia : 25;
+  const [start, setStart] = useState(Math.max(startAgeFromWorkYear, 16));
   const [end, setEnd] = useState(userData.gender === "male" ? 65 : 60);
 
   const [values, setValues] = useState<number[]>([start, end]);
