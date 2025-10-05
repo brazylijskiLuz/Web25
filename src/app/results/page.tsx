@@ -2,6 +2,7 @@
 import { AlertCircle } from "lucide-react";
 import useAvatar from "@/stores/useAvatar";
 import { useEffect } from "react";
+import { useHideAvatarGraphics } from "@/hooks/useHideAvatarGraphics";
 
 interface ScenariuszDluzszejPracy {
   dodatkowe_lata: number;
@@ -64,6 +65,8 @@ const formatDecimal = (value: number, decimals = 1): string => {
 
 const Results = () => {
   const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
+  // hide assistant on medium screens
+  useHideAvatarGraphics(800, true);
 
   useEffect(() => {
     setAvatarPosition("right");
@@ -120,9 +123,11 @@ const Results = () => {
 
   return (
     <div className="mt-20 flex w-full px-4 pb-10">
-      <div className="w-[60%]">
-        <label className="text-[20px] font-semibold">Kwota nominalna</label>
-        <h1 className="text-[108px] font-black leading-[108px] text-primary">
+      <div className="w-full md:w-[60%]">
+        <label className="text-[17px] md:text-[20px] font-semibold">
+          Kwota nominalna
+        </label>
+        <h1 className="text-[48px] lg:text-[108px] font-black leading-[108px] text-primary">
           {formatCurrency(data.emerytura_nominalna_miesieczna_brutto)} zł
         </h1>
         <p className="text-sm text-muted-foreground mt-2">
@@ -131,10 +136,12 @@ const Results = () => {
         </p>
 
         <label className="flex items-center gap-2 mt-12">
-          <p className="text-[20px] font-semibold">Kwota urealniona</p>
+          <p className="text-[17px] md:text-[20px] font-semibold">
+            Kwota urealniona
+          </p>
           <AlertCircle className="w-4 h-4" />
         </label>
-        <h2 className="font-black text-[80px] text-chart-1 leading-[80px]">
+        <h2 className="font-black text-[32px] lg:text-[80px] text-chart-1 leading-[80px]">
           {formatCurrency(data.emerytura_urealniona_miesieczna_brutto)} zł
         </h2>
         <p className="text-sm text-muted-foreground mt-2">
@@ -154,8 +161,8 @@ const Results = () => {
         {/* Stopa zastąpienia emerytury */}
         <div className="mt-12 bg-white p-8 rounded-lg border shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 md:w-2 md:h-2 bg-chart-1 rounded-full"></div>
             </div>
             <h3 className="text-xl font-semibold text-gray-900">
               Stopa zastąpienia emerytury
@@ -166,9 +173,9 @@ const Results = () => {
             <span className="text-5xl font-bold text-chart-1">
               {formatDecimal(data.stopa_zastapienia_procent)}%
             </span>
-            <div className="w-6 h-6 bg-chart-1/20 rounded-full flex items-center justify-center">
+            {/* <div className="w-6 h-6 bg-chart-1/20 rounded-full flex items-center justify-center">
               <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
-            </div>
+            </div> */}
           </div>
 
           {/* Progress bar */}
@@ -185,7 +192,7 @@ const Results = () => {
         {/* Wartość emerytury bez uwzględnienia okresu chorobowego */}
         <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
               <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
             </div>
             <h3 className="text-xl font-semibold text-gray-900">
@@ -221,7 +228,7 @@ const Results = () => {
         {/* Różnica wysokości składki */}
         <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
               <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
             </div>
             <h3 className="text-xl font-semibold text-gray-900">
@@ -230,7 +237,7 @@ const Results = () => {
             </h3>
           </div>
 
-          <div className="overflow-hidden border border-gray-200 rounded-lg">
+          <div className="overflow-y-hidden overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -328,7 +335,7 @@ const Results = () => {
         {/* Różnica wygenerowanej emerytury */}
         <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
+            <div className="md:w-8 w-9 h-9 md:h-8 bg-chart-1/20 rounded-full flex items-center justify-center">
               <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
             </div>
             <h3 className="text-xl font-semibold text-gray-900">
@@ -365,7 +372,7 @@ const Results = () => {
         {data.wplyw_przerw && (
           <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+              <div className="md:w-8 w-9 h-9 md:h-8 bg-secondary rounded-full flex items-center justify-center">
                 <div className="w-2 h-2 bg-secondary-foreground rounded-full"></div>
               </div>
               <h3 className="text-xl font-semibold text-gray-900">
@@ -408,7 +415,7 @@ const Results = () => {
         {data.komunikaty && data.komunikaty.length > 0 && (
           <div className="mt-8 bg-white p-8 rounded-lg border shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+              <div className="md:w-8 w-9 h-9 md:h-8 bg-secondary rounded-full flex items-center justify-center">
                 <div className="w-2 h-2 bg-secondary-foreground rounded-full"></div>
               </div>
               <h3 className="text-xl font-semibold text-gray-900">

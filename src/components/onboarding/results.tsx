@@ -1,3 +1,4 @@
+"use client";
 import { AlertCircle } from "lucide-react";
 
 interface ScenariuszDluzszejPracy {

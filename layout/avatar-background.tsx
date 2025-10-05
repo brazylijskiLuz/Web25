@@ -1,8 +1,11 @@
 "use client";
+import React, { useEffect } from "react";
+import { useHideAvatarGraphics } from "@/hooks/useHideAvatarGraphics";
 import Image from "next/image";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import useAvatar from "@/stores/useAvatar";
+import { useAvatarGraphics } from "@/stores/useAvatarGraphics";
 
 interface AvatarBackgroundProps {
   children?: React.ReactNode;
@@ -283,15 +286,29 @@ const getAssistantImagePath = (
 };
 
 export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
-  const avatar = useAvatar();
+  const { avatarSize, setAvatarSize, ...avatarRest } = useAvatar();
+  const { hidden } = useAvatarGraphics();
+
+  useEffect(() => {
+    const updateSize = () => {
+      const h = window.innerHeight;
+      const newSize = h < 600 ? "small" : h < 900 ? "medium" : "large";
+      if (newSize !== avatarSize) {
+        setAvatarSize(newSize as any);
+      }
+    };
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, [avatarSize, setAvatarSize]);
 
   return (
     <div>
       <div
         className={cn(
           patternVariants({
-            position: avatar.avatarPosition,
-            size: avatar.avatarSize,
+            position: avatarRest.avatarPosition,
+            size: avatarSize,
           })
         )}
       >
@@ -300,38 +317,42 @@ export const AvatarBackground = ({ children }: AvatarBackgroundProps) => {
 
       <div className="relative z-10 flex">{children}</div>
 
-      <div
-        className={cn(
-          circlePositionVariants({
-            position: avatar.avatarPosition,
-            size: avatar.avatarSize,
-          })
-        )}
-      >
-        <Image
-          src="/circle.svg"
-          alt="circle"
-          fill
-          style={{ objectFit: "contain" }}
-          priority
-        />
-      </div>
-      <div
-        className={cn(
-          assistantVariants({
-            position: avatar.avatarPosition,
-            size: avatar.avatarSize,
-          })
-        )}
-      >
-        <Image
-          src={getAssistantImagePath(avatar.avatarAssistant)}
-          alt="assistant"
-          fill
-          style={{ objectFit: "contain" }}
-          priority
-        />
-      </div>
+      {!hidden && (
+        <>
+          <div
+            className={cn(
+              circlePositionVariants({
+                position: avatarRest.avatarPosition,
+                size: avatarSize,
+              })
+            )}
+          >
+            <Image
+              src="/circle.svg"
+              alt="circle"
+              fill
+              style={{ objectFit: "contain" }}
+              priority
+            />
+          </div>
+          <div
+            className={cn(
+              assistantVariants({
+                position: avatarRest.avatarPosition,
+                size: avatarSize,
+              })
+            )}
+          >
+            <Image
+              src={getAssistantImagePath(avatarRest.avatarAssistant)}
+              alt="assistant"
+              fill
+              style={{ objectFit: "contain" }}
+              priority
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };
