@@ -107,12 +107,60 @@ const Dashboard = () => {
   const [startAge, setStartAge] = useState<number | null>();
   const [endAge, setEndAge] = useState<number | null>();
   const [validationError, setValidationError] = useState<string>("");
-  const [kodPocztowy, setKodPocztowy] = useState("00-000");
+  const [kodPocztowy, setKodPocztowy] = useState(null);
 
   const [userData, setUserData] = useState(USER_DATA);
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
 
   // TODO: Replace with API call
   const [messages, setMessages] = useState([]);
+
+  const sendReportToAPI = async () => {
+    try {
+      const payload = {
+        expectedPension: userData.desired_pension_amount,
+        sex: userData.gender === "male" ? 1 : 2,
+        salaryAmount: userData.current_salary,
+        consideredSickLeave: true,
+        accountBalance: userData.konto_zus,
+        subAccountBalance: userData.subkonto_zus,
+        pension: DATA.emerytura_nominalna_miesieczna_brutto,
+        realPension: DATA.emerytura_urealniona_miesieczna_brutto,
+        postalCode: kodPocztowy
+      };
+
+      const response = await fetch('/api/report/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Report created successfully:', result);
+      
+      if (result && result.value) {
+        let url = result.value;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        setReportUrl(url);
+      }
+    } catch (error) {
+      console.error('Error sending report to API:', error);
+    }
+  };
+
+  const downloadReport = () => {
+    if (reportUrl) {
+      window.open(reportUrl, '_blank');
+    }
+  };
 
   const handleAddToChat = (message: string) => {
     const newMessage = {
@@ -143,14 +191,22 @@ const Dashboard = () => {
     setAvatarPosition("right");
     setAvatarSize("small");
     setAvatarAssistant("pointing-up");
+    sendReportToAPI();
   }, []);
 
   return (
     <div className="flex w-full h-screen overflow-hidden mt-14">
       <div className="w-[60%] overflow-y-auto">
-        <h1 className="w-full text-[36px] font-bold">
-          Twój panel <span className="text-primary">emerytalny</span>
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="w-full text-[36px] font-bold">
+            Twój panel <span className="text-primary">emerytalny</span>
+          </h1>
+          {reportUrl && (
+            <Button onClick={downloadReport} className="ml-4">
+              Pobierz raport
+            </Button>
+          )}
+        </div>
         <RetirementQuota
           expectedAmount={7829}
           calculatedAmount={4829}
