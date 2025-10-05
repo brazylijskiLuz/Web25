@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "../ui/progress";
 import { getRandomFact } from "@/lib/facts";
+import useUserData from "@/stores/useUserData";
+import { useFormatted } from "@/stores/useFormatted";
 import {
   ChartContainer,
   ChartLegend,
@@ -192,6 +194,8 @@ export const StaticChat = ({
   console.log(showNewContent, "show");
   // Hide avatar graphics on small screens while chat active
   useHideAvatarGraphics(800, showNewContent);
+  const { setUserData } = useUserData();
+  const { formatted, setFormatted } = useFormatted();
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [userInput, setUserInput] = useState("");
   const [botPending, setBotPending] = useState(false);
@@ -357,6 +361,54 @@ export const StaticChat = ({
     setUserInput("");
     setBotPending(true);
 
+    // Save user data to store based on question index
+    const allMessages = [...messages, newUserMessage];
+    const userAnswers = allMessages
+      .filter((msg) => msg.type === "user")
+      .map((msg) => msg.content);
+
+    const currentAnswerIndex = userAnswers.length - 1;
+
+    // Map answers to userData fields based on question order
+    switch (currentAnswerIndex) {
+      case 0: // Wysokość emerytury
+        setUserData({ desired_pension_amount: Number(content) || 0 });
+        break;
+      case 1: // Wiek
+        setUserData({ age: Number(content) || 0 });
+        break;
+      case 2: // Płeć
+        setUserData({
+          gender: content.toLowerCase().includes("kobieta") ? "female" : "male",
+        });
+        break;
+      case 3: // Wynagrodzenie brutto
+        setUserData({ current_salary: Number(content) || 0 });
+        break;
+      case 4: // Rok rozpoczęcia pracy
+        const startYear = Number(content) || 0;
+        setUserData({ rok_rozpoczecia_pracy: startYear });
+
+        // Calculate expected retirement year (assuming 25-30 years of work)
+        const currentUserAge = allMessages
+          .filter((msg) => msg.type === "user")
+          .map((msg) => msg.content)[1]; // Age is at index 1
+        const age = Number(currentUserAge) || 0;
+
+        // Standard retirement age in Poland: 60 for women, 65 for men
+        const gender = allMessages
+          .filter((msg) => msg.type === "user")
+          .map((msg) => msg.content)[2]; // Gender is at index 2
+        const retirementAge = gender?.toLowerCase().includes("kobieta")
+          ? 60
+          : 65;
+        const retirementYear =
+          new Date().getFullYear() + Math.max(0, retirementAge - age);
+
+        setUserData({ rok_przejscia_na_emeryture: retirementYear });
+        break;
+    }
+
     // Note: fullQueue computed above with potential additions
 
     const isLastQuestion = currentMessageIndex >= fullQueue.length;
@@ -417,6 +469,9 @@ export const StaticChat = ({
             formattedContent += `\nprzerwy_laczna_liczba_miesiecy: ${przerwy_laczna_liczba_miesiecy}`;
           }
         }
+
+        // Store formatted content in Zustand store
+        setFormatted(formattedContent);
 
         const requestPayload = {
           messages: [
@@ -650,23 +705,39 @@ export const StaticChat = ({
     }
   }, [hasForwarded.current]);
 
-  const randomFact = useMemo(() => getRandomFact(), []);
+  const [randomFact, setRandomFact] = useState(() => getRandomFact());
+
+  // Change random fact every 3 seconds during loading
+  useEffect(() => {
+    if (!showSpinner) return;
+
+    const interval = setInterval(() => {
+      setRandomFact(getRandomFact());
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [showSpinner]);
 
   // When loading, replace chat UI with standalone progress screen
   if (showSpinner) {
     return (
       <div className="w-full h-auto flex items-center justify-center mt-14">
         <div className="rounded-md p-6 flex flex-col max-w-80 items-center gap-4 min-w-[320px]">
-          <p className="text-xl font-bold mb-4">
-            Obliczamy twoją <span className="text-primary">emeryturę</span>
+          <p className="text-xl font-bold mb-4 text-center w-full">
+            Obliczamy twoją <span className="text-primary">emeryturę</span>.
           </p>
           <Progress
             value={progress}
             className="w-64 transition-all duration-700"
           />
-          <p className="text-sm text-muted-foreground text-center pb-2">
-            {randomFact}
-          </p>
+          <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm w-[30vw] mt-10 justify-center">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide">
+              Ciekawostka
+            </h3>
+            <p className="text-sm text-gray-700 text-left leading-relaxed">
+              {randomFact}
+            </p>
+          </div>
         </div>
       </div>
     );

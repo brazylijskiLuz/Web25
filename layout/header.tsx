@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Accessibility } from "lucide-react";
 import { useAccessibility } from "@/stores/useAccessibility";
@@ -15,9 +16,9 @@ export const Header = () => {
     <header className="flex justify-between py-6">
       <Link
         href="/"
-        className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity no-border"
+        className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity no-border flex items-center"
       >
-        Symulator <span className="text-primary">Emerytalny</span>
+        <Image src="/logo.svg" alt="Logo" width={150} height={150} />
       </Link>
       <nav className="flex items-center gap-4">
         <Button
