@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const { setAvatarPosition, setAvatarAssistant } = useAvatar();
+  const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
   const [isHidden, setIsHidden] = useState(false);
   const [showNewContent, setShowNewContent] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
@@ -18,6 +18,7 @@ export default function Home() {
   useEffect(() => {
     setAvatarPosition("middle");
     setAvatarAssistant("hand-raised");
+    setAvatarSize("large");
   }, []);
 
   const handleStartClick = () => {
@@ -27,6 +28,7 @@ export default function Home() {
       setShowNewContent(true);
       setAnimationFinished(true);
       setAvatarAssistant("pointing-right");
+      setAvatarSize("medium");
     }, 800);
   };
 
@@ -34,6 +36,7 @@ export default function Home() {
     setResultsData(data);
     setAvatarPosition("left");
     setAvatarAssistant("pointing-left");
+    redirect("/results");
   };
 
   return (

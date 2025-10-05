@@ -1,19 +1,8 @@
 import { cn } from "@/lib/utils";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { Loader2 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { getRandomFact } from "@/lib/facts";
+import { useState, useEffect, useRef } from "react";
 import { Message } from "./message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 
 interface MessageData {
   id: string;

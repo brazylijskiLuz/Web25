@@ -1,9 +1,19 @@
+"use client";
 import { AlertCircle } from "lucide-react";
-import { AvatarBackground } from "../../../layout/avatar-background";
+import useAvatar from "@/stores/useAvatar";
+import { useEffect } from "react";
 
 const Results = () => {
+  const { setAvatarPosition, setAvatarAssistant, setAvatarSize } = useAvatar();
+
+  useEffect(() => {
+    setAvatarPosition("right");
+    setAvatarAssistant("pointing-left");
+    setAvatarSize("large");
+  }, []);
+
   return (
-    <div className="mt-20 flex">
+    <div className="mt-20 flex w-full">
       <div className="w-[60%]">
         <label className="text-[20px] font-semibold">Kwota rzeczywista</label>
         <h1 className="text-[108px] font-black leading-[108px] text-primary">
@@ -19,9 +29,6 @@ const Results = () => {
         <div>
           <div></div>
         </div>
-      </div>
-      <div className="w-[40%]">
-        <AvatarBackground circlePosition="right" assistant="pointing-left" />
       </div>
     </div>
   );

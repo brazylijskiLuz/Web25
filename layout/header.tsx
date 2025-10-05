@@ -9,7 +9,7 @@ export const Header = () => {
   const isAdminPage = pathname === "/admin";
 
   return (
-    <header className="flex justify-between px-20 py-6">
+    <header className="flex justify-between py-6">
       <Link
         href="/"
         className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity"
