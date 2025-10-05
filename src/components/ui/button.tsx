@@ -48,11 +48,14 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button";
 
+  // Extract key from props to avoid spreading it
+  const { key, ...restProps } = props;
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
+      {...restProps}
     />
   );
 }
