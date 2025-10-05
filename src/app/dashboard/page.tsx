@@ -5,6 +5,7 @@ import useAvatar from "@/stores/useAvatar";
 import { Info } from "lucide-react";
 import { SelectionField } from "@/components/ui/selection-field";
 import { ChatPanel } from "@/components/ui/chat-panel";
+import { RetirementQuota } from "@/components/ui/retirement-quota";
 
 const DATA = {
   emerytura_nominalna_miesieczna_brutto: 3250.88,
@@ -92,14 +93,14 @@ const Dashboard = () => {
   // TODO: Replace with API call
   const [messages, setMessages] = useState([]);
 
-  const handleSendMessage = (message: string) => {
+  const handleAddToChat = (message: string) => {
     const newMessage = {
       id: Date.now().toString(),
       title: message,
       description: "",
-      isUser: true,
+      isUser: true
     };
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
   };
 
   useEffect(() => {
@@ -114,6 +115,11 @@ const Dashboard = () => {
         <h1 className="w-full text-[36px] font-bold">
           Twój panel <span className="text-primary">emerytalny</span>
         </h1>
+        <RetirementQuota 
+          expectedAmount={7829}
+          calculatedAmount={4829}
+          onAddToChat={handleAddToChat}
+        />
         <div className="w-full rounded-2xl p-6 bg-white shadow-2x mt-10">
           <h2 className="items-center flex font-bold text-[24px] mb-8">
             Ścieżka życia <Info className="w-4 h-4 ml-2 " />
@@ -138,7 +144,10 @@ const Dashboard = () => {
       </div>
       <div className="w-[40%] h-full overflow-visible">
         <div className="sticky top-16 w-full h-[640px] overflow-hidden">
-          <ChatPanel messages={messages} onSendMessage={handleSendMessage} />
+          <ChatPanel 
+            messages={messages} 
+            userData={DATA}
+          />
         </div>
       </div>
     </div>

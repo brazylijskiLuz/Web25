@@ -46,9 +46,9 @@ export function ChatMessage({
 
       {/* Message Content */}
       <div className="flex-1">
-        <h3 className="text-[20px] font-bold text-gray-900 mb-2">{title}</h3>
+        <div className="text-[16px] text-gray-900 leading-relaxed whitespace-pre-wrap">{title}</div>
         {description && (
-          <p className="text-[16px] text-gray-700 leading-relaxed">
+          <p className="text-[16px] text-gray-700 leading-relaxed mt-2">
             {description}
           </p>
         )}
